@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NormalSpaceDataPointsFilter
 template <typename T>
 NormalSpaceDataPointsFilter<T>::NormalSpaceDataPointsFilter(const Parameters& params) :
-	PointMatcher<T>::DataPointsFilter("NormalSpaceDataPointsFilter", 
+	PointMatcher<T>::DataPointsFilter("NormalSpaceDataPointsFilter",
 		NormalSpaceDataPointsFilter::availableParameters(), params),
 	nbSample{Parametrizable::get<std::size_t>("nbSample")},
 	seed{Parametrizable::get<std::size_t>("seed")},
@@ -65,7 +65,7 @@ template <typename T>
 void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
 	static const int alreadySampled = -1;
-	
+
 	//check dimension
 	const std::size_t featDim = cloud.features.rows();
 	if(featDim < 4) //3D case support only
@@ -73,9 +73,9 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		std::cerr << "ERROR: NormalSpaceDataPointsFilter does not support 2D point cloud yet (does nothing)" << std::endl;
 		return;
 	}
-		
+
 	//Check number of points
-	const int nbPoints = cloud.getNbPoints();		
+	const int nbPoints = cloud.getNbPoints();
 	if(nbSample >= std::size_t(nbPoints))
 		return;
 
@@ -84,29 +84,29 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors.");
 
 	const auto& normals = cloud.getDescriptorViewByName("normals");
-	
+
 	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
 	std::uniform_real_distribution<> uni01(0., 1.);
-	
+
 	//bucketed normal space
 	std::vector<std::vector<int>> idBuckets; //stock int so we can marked selected with -1
 	idBuckets.resize(nbBucket);
-	
+
 	std::vector<std::size_t> keepIndexes;
 	keepIndexes.reserve(nbSample);
-	
+
 	///(1) put all points of the data into buckets based on their normal direction
 	for (int i = 0; i < nbPoints; ++i)
 	{
 		assert(normals.col(i).head(3).norm() == 1);
-		
+
 		//Theta = polar angle in [0 ; pi]
-		const T theta = std::acos(normals(2, i)); 
-		//Phi = azimuthal angle in [0 ; 2pi] 
+		const T theta = std::acos(normals(2, i));
+		//Phi = azimuthal angle in [0 ; 2pi]
 		const T phi = std::fmod(std::atan2(normals(1, i), normals(0, i)) + 2. * M_PI, 2. * M_PI);
-		
+
 		//assert(theta >= 0. and theta =< M_PI and phi >= 0. and phi <= 2.*M_PI);
-		
+
 		idBuckets[bucketIdx(theta, phi)].push_back(i);
 	}
 	///(2) uniformly pick points from all the buckets until the desired number of points is selected
@@ -120,7 +120,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		//Check size
 		if(curBucket.empty())
 			continue;
-	
+
 		const std::size_t bucketSize = curBucket.size();
 
 		//Check if not already all sampled
@@ -132,7 +132,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 		if(isEntireBucketSampled)
 			continue;
-			
+
 		///(3) A point is randomly picked in a bucket that contains multiple points
 		int idToKeep = 0;
 		std::size_t idInBucket = 0;
@@ -141,7 +141,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			 idInBucket = static_cast<std::size_t>(bucketSize * uni01(gen));
 			 idToKeep = curBucket[idInBucket];
 
-		} while(idToKeep == alreadySampled); 
+		} while(idToKeep == alreadySampled);
 
 		keepIndexes.push_back(static_cast<std::size_t>(idToKeep));
 
@@ -151,7 +151,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
 	std::unordered_map<std::size_t, std::size_t> mapidx;
 	std::size_t idx = 0;
-	
+
 	///(4) Sample the point cloud
 	for(std::size_t id : keepIndexes)
 	{
@@ -159,8 +159,8 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		if(id<idx)
 			id = mapidx[id];
 		//Switch columns id and idx
-		cloud.swapCols(idx, id);	
-		//Maintain new index position	
+		cloud.swapCols(idx, id);
+		//Maintain new index position
 		mapidx[idx] = id;
 		//Update index
 		++idx;
