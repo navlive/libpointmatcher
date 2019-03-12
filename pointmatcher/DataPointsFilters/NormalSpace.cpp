@@ -46,7 +46,7 @@ NormalSpaceDataPointsFilter<T>::NormalSpaceDataPointsFilter(const Parameters& pa
 	nbSample{Parametrizable::get<std::size_t>("nbSample")},
 	seed{Parametrizable::get<std::size_t>("seed")},
 	epsilon{Parametrizable::get<T>("epsilon")},
-	nbBucket{std::size_t((2.0 * M_PI / epsilon) * (M_PI / epsilon))}
+	nbBucket{std::size_t(ceil(2.0 * M_PI / epsilon) * ceil(M_PI / epsilon))}
 {
 }
 
@@ -177,7 +177,11 @@ std::size_t NormalSpaceDataPointsFilter<T>::bucketIdx(T theta, T phi) const
 {
 	//Theta = polar angle in [0 ; pi] and Phi = azimuthal angle in [0 ; 2pi]
 	assert((theta >= 0.0) && (theta <= static_cast<T>(M_PI)) && (phi >= 0) && (phi <= 2.0*((float) static_cast<T>(M_PI))));
-	return static_cast<std::size_t>(theta / epsilon) * static_cast<std::size_t>(2. * M_PI / epsilon) + static_cast<std::size_t>(phi / epsilon);
+
+	// Wrap Theta at Pi
+	if (theta == static_cast<T>(M_PI)) { theta = 0.0; };
+	//                               block number           block size               element number
+	return static_cast<std::size_t>( floor(theta/epsilon) * ceil(2.0*M_PI/epsilon) + floor(phi/epsilon) );
 }
 
 template struct NormalSpaceDataPointsFilter<float>;
