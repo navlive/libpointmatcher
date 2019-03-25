@@ -176,7 +176,8 @@ template <typename T>
 std::size_t NormalSpaceDataPointsFilter<T>::bucketIdx(T theta, T phi) const
 {
 	//Theta = polar angle in [0 ; pi] and Phi = azimuthal angle in [0 ; 2pi]
-	assert((theta >= 0.0) && (theta <= static_cast<T>(M_PI)) && (phi >= 0) && (phi <= 2.0*((float) static_cast<T>(M_PI))));
+	assert( (theta >= 0.0) && (theta <= static_cast<T>(M_PI)) && "Theta not in [0, Pi]");
+	assert( (phi >= 0) && (phi <= 2.0*((float) static_cast<T>(M_PI))) && "Phi not in [0, 2Pi]");
 
 	// Wrap Theta at Pi
 	if (theta == static_cast<T>(M_PI)) { theta = 0.0; };
