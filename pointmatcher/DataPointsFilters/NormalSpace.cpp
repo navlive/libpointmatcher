@@ -112,7 +112,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		//Phi = azimuthal angle in [0 ; 2pi]
 		const T phi = std::fmod(std::atan2(normals(1, randIdx), normals(0, randIdx)) + 2. * M_PI, 2. * M_PI);
 
-		// Catch normal space hasing errors
+		// Catch normal space hashing errors
 		assert(bucketIdx(theta, phi) < nbBucket);
 		idBuckets[bucketIdx(theta, phi)].push_back(randIdx);
 	}
