@@ -180,6 +180,8 @@ std::size_t NormalSpaceDataPointsFilter<T>::bucketIdx(T theta, T phi) const
 
 	// Wrap Theta at Pi
 	if (theta == static_cast<T>(M_PI)) { theta = 0.0; };
+	// Wrap Phi at 2Pi
+	if (phi == static_cast<T>(2*M_PI)) { phi = 0.0; };
 	//                               block number           block size               element number
 	return static_cast<std::size_t>( floor(theta/epsilon) * ceil(2.0*M_PI/epsilon) + floor(phi/epsilon) );
 }
