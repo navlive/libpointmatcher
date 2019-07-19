@@ -149,4 +149,5 @@ libpointmatcher is released under a permissive BSD license. Enjoy!
 
 ---
 
+
 ![alt tag](doc/images/banner_dark.jpeg)
