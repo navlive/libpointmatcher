@@ -92,6 +92,13 @@ namespace PointMatcherSupport
 		TransformationError(const std::string& reason);
 	};
 
+	//! An expception thrown when the yaml config file contains invalid configuration (e.g., mutually exclusive settings)
+	struct ConfigurationError: std::runtime_error
+	{
+		//! return an exception when a transformation has invalid parameters
+		ConfigurationError(const std::string& reason);
+	};
+
 	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable
 	{
@@ -658,8 +665,9 @@ struct PointMatcher
 
 		virtual void setDefault();
 
-		void loadFromYaml(std::istream& in);
-		unsigned getPrefilteredReadingPtsCount() const;
+		virtual void loadFromYaml(std::istream& in);
+
+    unsigned getPrefilteredReadingPtsCount() const;
 		unsigned getPrefilteredReferencePtsCount() const;
 
 		bool getMaxNumIterationsReached() const;
@@ -733,6 +741,8 @@ struct PointMatcher
 		bool hasMap() const;
 		bool setMap(const DataPoints& map);
 		void clearMap();
+		virtual void setDefault();
+		virtual void loadFromYaml(std::istream& in);
 		PM_DEPRECATED("Use getPrefilteredInternalMap instead. "
 			            "Function now always returns map with filter chain applied. "
 			            "This may have altered your program behavior."
