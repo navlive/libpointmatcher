@@ -68,7 +68,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C
 	if(WIN32)
 		set(CMAKE_SHARED_LIBRARY_PREFIX "")	# DLLs do not have a "lib" prefix
 		set(CMAKE_IMPORT_LIBRARY_PREFIX "")	# same for DLL import libs
-		set(CMAKE_LINK_DEF_FILE_FLAG "")	# CMake workaround (2.8.3)
+		set(CMAKE_LINK_DEF_FILE_FLAG "")	# CMake workaround (3.5.1)
 	endif()
 
 	### Project stuff
