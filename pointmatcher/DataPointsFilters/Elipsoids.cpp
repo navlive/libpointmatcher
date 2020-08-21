@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "Elipsoids.h"
 
-#include "utils.h"
+#include "utils/utils.h"
 // Eigenvalues
 #include "Eigen/QR"
 #include "Eigen/Eigenvalues"

@@ -3,7 +3,7 @@
 
 #include "pointmatcher/PointMatcher.h"
 #include "pointmatcher/IO.h"
-#include "../contrib/gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <string>
 #include <fstream>

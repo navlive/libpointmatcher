@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/format.hpp>
 
-#include "utils.h"
+#include "utils/utils.h"
 
 // SurfaceNormalDataPointsFilter
 // Constructor
