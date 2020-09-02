@@ -107,6 +107,7 @@ install(
 # TODO(ynava) Currently unit tests are only enabled if the build type is NOT debug.
 # When the CI pipeline supports optimized unit test runs, we should remove this extra condition.
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+find_package(cmake_code_coverage QUIET)
 if(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
   catkin_add_gtest(test_pointmatcher
       utest/utest.cpp
@@ -141,20 +142,19 @@ if(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
 
   set(TEST_DATA_FOLDER "${CMAKE_SOURCE_DIR}/examples/data/")
   add_definitions(-DUTEST_TEST_DATA_PATH="${TEST_DATA_FOLDER}/")
-endif(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
 
-##################
-# Code_coverage ##
-##################
-find_package(cmake_code_coverage QUIET)
-if(cmake_code_coverage_FOUND AND NOT BUILD_TYPE STREQUAL "DEBUG")
-  add_gtest_coverage(
-    TEST_BUILD_TARGETS
-      test_pointmatcher
-    SOURCE_EXCLUDE_PATTERN
-      ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-pm/include/yaml-cpp-pm/** # Cold copy of yaml-cpp headers.
-      ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-pm/src/** # Cold copy of yaml-cpp sources.
-      ${PROJECT_SOURCE_DIR}/utest/*
-      ${PROJECT_SOURCE_DIR}/utest/ui/*
-  )
-endif(cmake_code_coverage_FOUND AND NOT BUILD_TYPE STREQUAL "DEBUG")
+  ##################
+  # Code_coverage ##
+  ##################
+  if(cmake_code_coverage_FOUND)
+    add_gtest_coverage(
+      TEST_BUILD_TARGETS
+        test_pointmatcher
+      SOURCE_EXCLUDE_PATTERN
+        ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-pm/include/yaml-cpp-pm/** # Cold copy of yaml-cpp headers.
+        ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-pm/src/** # Cold copy of yaml-cpp sources.
+        ${PROJECT_SOURCE_DIR}/utest/*
+        ${PROJECT_SOURCE_DIR}/utest/ui/*
+    )
+  endif()
+endif(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
