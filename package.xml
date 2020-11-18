@@ -11,6 +11,7 @@
   <!-- If a pure-cmake build is desired, the buildtool should be switched to 'cmake' -->
   <!-- On the other hand, if a catkin build is desired, the build tool depend should be 'catkin' -->
   <buildtool_depend>catkin</buildtool_depend>
+<!--   <build_depend>cmake_clang_tools</build_depend> -->
 
   <build_depend>boost</build_depend>
   <build_depend>libnabo</build_depend>

@@ -158,3 +158,13 @@ if(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
     )
   endif()
 endif(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
+
+#################
+## Clang_tools ##
+#################
+find_package(cmake_clang_tools QUIET)
+if(cmake_clang_tools_FOUND)
+  add_default_clang_tooling(
+    DISABLE_CLANG_FORMAT
+  )
+endif(cmake_clang_tools_FOUND)
