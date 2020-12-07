@@ -23,7 +23,7 @@ find_package(Boost REQUIRED COMPONENTS chrono date_time filesystem program_optio
 # Catkin package macro
 catkin_package(
   INCLUDE_DIRS
-    pointmatcher
+    ${CMAKE_SOURCE_DIR}
     ${EIGEN3_INCLUDE_DIR}
   LIBRARIES
     yaml_cpp_pm
@@ -44,33 +44,31 @@ add_library(yaml_cpp_pm
   ${YAML_SOURCES}
   ${YAML_PRIVATE_HEADERS}
 )
-
-target_include_directories(yaml_cpp_pm
-  PUBLIC
-    contrib/yaml-cpp-pm/include
-  PRIVATE
-    contrib/yaml-cpp-pm/src
+target_include_directories(yaml_cpp_pm PUBLIC
+  contrib/yaml-cpp-pm/include
 )
+target_include_directories(yaml_cpp_pm PRIVATE
+  contrib/yaml-cpp-pm/src
+)
+target_compile_options(yaml_cpp_pm PRIVATE -w)
 
 # Libpointmatcher
 add_library(pointmatcher
   ${POINTMATCHER_SRC}
   ${POINTMATCHER_HEADERS}
 )
-
-target_include_directories(pointmatcher
-  PUBLIC
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/pointmatcher
-    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
-    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
-  SYSTEM
-    ${EIGEN3_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
-    ${yaml_cpp_pm_INCLUDE_DIRS}
+target_include_directories(pointmatcher PUBLIC
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/pointmatcher
+  ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
+  ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
 )
-
+target_include_directories(pointmatcher SYSTEM PRIVATE
+  ${EIGEN3_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${yaml_cpp_pm_INCLUDE_DIRS}
+)
 target_link_libraries(pointmatcher
   ${catkin_LIBRARIES}
   Boost::chrono
@@ -121,19 +119,21 @@ if(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
       utest/ui/Outliers.cpp
       utest/ui/Transformations.cpp
   )
-
-  target_include_directories(test_pointmatcher PRIVATE
-    PRIVATE
-      ${CMAKE_SOURCE_DIR}
-      ${CMAKE_SOURCE_DIR}/pointmatcher
-      ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
-      ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
-    SYSTEM
-      ${EIGEN3_INCLUDE_DIR}
-      ${Boost_INCLUDE_DIRS}
-      ${catkin_INCLUDE_DIRS}
+  add_dependencies(test_pointmatcher
+    pointmatcher
+    yaml_cpp_pm
   )
-
+  target_include_directories(test_pointmatcher PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/pointmatcher
+    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
+    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
+  )
+  target_include_directories(test_pointmatcher SYSTEM PUBLIC
+    ${EIGEN3_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+  )
   target_link_libraries(test_pointmatcher
     pointmatcher
     yaml_cpp_pm

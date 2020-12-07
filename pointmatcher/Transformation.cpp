@@ -66,13 +66,9 @@ void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const Transforma
 	// TODO: This API must be re-written to not even have the concept
 	// of chain for this classs. 
 	int num_iter = 0;
-
-	DataPoints transformedCloud;
-	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
+	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it, ++num_iter)
 	{
-		transformedCloud = (*it)->compute(cloud, parameters);
-		swapDataPoints(cloud, transformedCloud);
-		num_iter++;
+		(*it)->inPlaceCompute(parameters, cloud);
 	}
 	if (num_iter != 1)
 		throw std::runtime_error("Transformations: Error, the transform should have been applied just once.");
