@@ -657,6 +657,7 @@ struct PointMatcher
 		DataPointsFilters readingDataPointsFilters; //!< filters for reading, applied once
 		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
 		DataPointsFilters referenceDataPointsFilters; //!< filters for reference
+		Matches matches; //!< data associations
 		Transformations transformations; //!< transformations
 		std::shared_ptr<Matcher> matcher; //!< matcher
 		OutlierFilters outlierFilters; //!< outlier filters
@@ -670,10 +671,13 @@ struct PointMatcher
 
 		virtual void loadFromYaml(std::istream& in);
 
-    unsigned getPrefilteredReadingPtsCount() const;
+    	unsigned getPrefilteredReadingPtsCount() const;
 		unsigned getPrefilteredReferencePtsCount() const;
 
 		bool getMaxNumIterationsReached() const;
+
+		//! Return the latest data association between reading and reference point clouds.
+		const Matches& getMatches() const { return matches; }
 
 	protected:
 		unsigned prefilteredReadingPtsCount; //!< remaining number of points after prefiltering but before the iterative process

@@ -382,18 +382,16 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		
 		//-----------------------------
 		// Match to closest point in Reference
-		const Matches matches(
-			this->matcher->findClosests(stepReading)
-		);
+		this->matches = this->matcher->findClosests(stepReading);
 		
 		//-----------------------------
 		// Detect outliers
 		const OutlierWeights outlierWeights(
-			this->outlierFilters.compute(stepReading, reference, matches)
+			this->outlierFilters.compute(stepReading, reference, this->matches)
 		);
 		
-		assert(outlierWeights.rows() == matches.ids.rows());
-		assert(outlierWeights.cols() == matches.ids.cols());
+		assert(outlierWeights.rows() == this->matches.ids.rows());
+		assert(outlierWeights.cols() == this->matches.ids.cols());
 		
 		//cout << "outlierWeights: " << outlierWeights << "\n";
 	
@@ -401,7 +399,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, T_iter, reference, stepReading, matches, outlierWeights, this->transformationCheckers
+			iterationCount, T_iter, reference, stepReading, this->matches, outlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
@@ -409,7 +407,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, matches) * T_iter;
+			stepReading, reference, outlierWeights, this->matches) * T_iter;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
