@@ -57,6 +57,9 @@ add_library(pointmatcher
   ${POINTMATCHER_SRC}
   ${POINTMATCHER_HEADERS}
 )
+add_dependencies(pointmatcher
+  yaml_cpp_pm
+)
 target_include_directories(pointmatcher PUBLIC
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/pointmatcher
@@ -102,11 +105,8 @@ install(
 ##########
 ## Test ##
 ##########
-# TODO(ynava) Currently unit tests are only enabled if the build type is NOT debug.
-# When the CI pipeline supports optimized unit test runs, we should remove this extra condition.
-string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 find_package(cmake_code_coverage QUIET)
-if(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
+if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_pointmatcher
       utest/utest.cpp
       utest/ui/DataFilters.cpp
@@ -157,7 +157,7 @@ if(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
         ${PROJECT_SOURCE_DIR}/utest/ui/*
     )
   endif()
-endif(CATKIN_ENABLE_TESTING AND NOT BUILD_TYPE STREQUAL "DEBUG")
+endif(CATKIN_ENABLE_TESTING)
 
 #################
 ## Clang_tools ##
