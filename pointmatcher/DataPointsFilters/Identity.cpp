@@ -47,7 +47,7 @@ typename PointMatcher<T>::DataPoints IdentityDataPointsFilter<T>::filter(
 // In-place filter
 template<typename T>
 void IdentityDataPointsFilter<T>::inPlaceFilter(
-	DataPoints& cloud)
+	DataPoints& /*cloud*/)
 {
 }
 

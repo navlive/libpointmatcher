@@ -386,4 +386,4 @@ namespace PointMatcherSupport
 		else
 			return newText;
 	}
-}; // PointMatcherSupport
+} // PointMatcherSupport

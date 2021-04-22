@@ -82,9 +82,9 @@ namespace PointMatcherSupport
 	bool FileLogger::hasInfoChannel() const
 	{
 		return true; 
-	};
+	}
 	
-	void FileLogger::beginInfoEntry(const char *file, unsigned line, const char *func)
+	void FileLogger::beginInfoEntry(const char* /*file*/, unsigned /*line*/, const char* /*func*/)
 	{
 	}
 	
@@ -106,7 +106,7 @@ namespace PointMatcherSupport
 		return true;
 	}
 	
-	void FileLogger::beginWarningEntry(const char *file, unsigned line, const char *func)
+	void FileLogger::beginWarningEntry(const char* /*file*/, unsigned /*line*/, const char* /*func*/)
 	{
 	}
 	

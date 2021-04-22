@@ -157,7 +157,6 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 	Eigen::EigenSolver<Matrix66> solver(covariance);		
 	const Matrix66  eigenVe = solver.eigenvectors().real();
-	const Vector6   eigenVa = solver.eigenvalues().real();
 	
 	///---- Part B
 	//B.1 - Compute the v-6 for each candidate

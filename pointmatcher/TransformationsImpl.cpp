@@ -214,7 +214,7 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 
 //! Nothing to check for a similarity transform
 template<typename T>
-bool TransformationsImpl<T>::SimilarityTransformation::checkParameters(const TransformationParameters& parameters) const
+bool TransformationsImpl<T>::SimilarityTransformation::checkParameters(const TransformationParameters& /*parameters*/) const
 {
 	//FIXME: FP - should we put that as function argument?
 	return true;

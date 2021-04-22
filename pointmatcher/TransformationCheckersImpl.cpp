@@ -55,13 +55,13 @@ TransformationCheckersImpl<T>::CounterTransformationChecker::CounterTransformati
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::CounterTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::CounterTransformationChecker::init(const TransformationParameters& /*parameters*/, bool& /*iterate*/)
 {
 	this->conditionVariables.setZero(1);
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::CounterTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::CounterTransformationChecker::check(const TransformationParameters& /*parameters*/, bool& iterate)
 {
 	this->conditionVariables(0)++;
 	
@@ -100,7 +100,7 @@ TransformationCheckersImpl<T>::DifferentialTransformationChecker::DifferentialTr
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::DifferentialTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::DifferentialTransformationChecker::init(const TransformationParameters& parameters, bool& /*iterate*/)
 {
 	this->conditionVariables.setZero(2);
 	
@@ -180,7 +180,7 @@ TransformationCheckersImpl<T>::BoundTransformationChecker::BoundTransformationCh
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& /*iterate*/)
 {
 	this->conditionVariables.setZero(2);
 	if (parameters.rows() == 4)
@@ -195,7 +195,7 @@ void TransformationCheckersImpl<T>::BoundTransformationChecker::init(const Trans
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& /*iterate*/)
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	

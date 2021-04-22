@@ -1533,6 +1533,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 						it->pmRowID = rowIdTime;
 						timeLabelGen.add(supLabel.internalName);
 						rowIdTime++;
+						break;
 					default:
 						throw runtime_error(string("PLY Implementation Error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 						break;
@@ -2122,6 +2123,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 						header.properties[i].pmRowID = rowIdTime;
 						timeLabelGen.add(supLabel.internalName, prop.count);
 						rowIdTime += prop.count;
+						break;
 					default:
 						throw runtime_error(string("PCD Implementation Error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 						break;

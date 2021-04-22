@@ -39,14 +39,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NullMatcher
 template<typename T>
 void MatchersImpl<T>::NullMatcher::init(
-	const DataPoints& filteredReference)
+	const DataPoints& /*filteredReference*/)
 {
 	
 }
 
 template<typename T>
 typename PointMatcher<T>::Matches MatchersImpl<T>::NullMatcher::findClosests(
-	const DataPoints& filteredReading)
+	const DataPoints& /*filteredReading*/)
 {
 	return Matches();
 }

@@ -74,6 +74,6 @@ namespace PointMatcherSupport
 		} \
 	}
 
-};
+}
 
 #endif // __POINTMATCHER_PRIVATE_H

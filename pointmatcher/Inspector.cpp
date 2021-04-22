@@ -61,29 +61,29 @@ void PointMatcher<T>::Inspector::init()
 
 //! Add a value for statistics name, create it if new
 template<typename T>
-void PointMatcher<T>::Inspector::addStat(const std::string& name, double data)
+void PointMatcher<T>::Inspector::addStat(const std::string& /*name*/, double /*data*/)
 {}
 
 //! Dump all statistics in CSV format
 template<typename T>
-void PointMatcher<T>::Inspector::dumpStats(std::ostream& stream)
+void PointMatcher<T>::Inspector::dumpStats(std::ostream& /*stream*/)
 {}
 
 //! Dump header for all statistics
 template<typename T>
-void PointMatcher<T>::Inspector::dumpStatsHeader(std::ostream& stream)
+void PointMatcher<T>::Inspector::dumpStatsHeader(std::ostream& /*stream*/)
 {}
 
 // data statistics 
 
 //! Dump the state of a given iteration
 template<typename T>
-void PointMatcher<T>::Inspector::dumpIteration(const size_t iterationNumber, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers)
+void PointMatcher<T>::Inspector::dumpIteration(const size_t /*iterationNumber*/, const TransformationParameters& /*parameters*/, const DataPoints& /*filteredReference*/, const DataPoints& /*reading*/, const Matches& /*matches*/, const OutlierWeights& /*outlierWeights*/, const TransformationCheckers& /*transformationCheckers*/)
 {}
 
 //! Tell the inspector the ICP operation is completed
 template<typename T>
-void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
+void PointMatcher<T>::Inspector::finish(const size_t /*iterationCount*/)
 {}
 
 template struct PointMatcher<float>::Inspector;

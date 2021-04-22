@@ -384,7 +384,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& fi
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	const size_t iterationNumber,
-	const TransformationParameters& parameters,
+	const TransformationParameters& /*parameters*/,
 	const DataPoints& filteredReference,
 	const DataPoints& reading,
 	const Matches& matches,
@@ -703,7 +703,7 @@ typename PointMatcher<T>::Matrix InspectorsImpl<T>::AbstractVTKInspector::padWit
 }
 
 template<typename T>
-void InspectorsImpl<T>::AbstractVTKInspector::finish(const size_t iterationCount)
+void InspectorsImpl<T>::AbstractVTKInspector::finish(const size_t /*iterationCount*/)
 {
 }
 
@@ -740,7 +740,7 @@ void InspectorsImpl<T>::VTKFileInspector::init()
 }
 
 template<typename T>
-void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
+void InspectorsImpl<T>::VTKFileInspector::finish(const size_t /*iterationCount*/)
 {
 	if (!bDumpIterationInfo) return;
 	closeStream(this->streamIter);

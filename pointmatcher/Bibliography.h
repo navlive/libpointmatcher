@@ -70,7 +70,7 @@ namespace PointMatcherSupport
 	
 	std::string getAndReplaceBibEntries(const std::string&, CurrentBibliography& curBib);
 	
-}; // PointMatcherSupport
+} // PointMatcherSupport
 
 #endif // __POINTMATCHER_BIBLIOGRAPHY_H
 

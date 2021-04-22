@@ -341,7 +341,7 @@ void GestaltDataPointsFilter<T>::buildNew(
 
 template<typename T>
 void GestaltDataPointsFilter<T>::fuseRange(
-	BuildData& data, DataPoints& input, const int first, const int last) const
+	BuildData& data, DataPoints& input, const int /*first*/, const int /*last*/) const
 {
   using namespace PointMatcherSupport;
   
@@ -596,7 +596,7 @@ GestaltDataPointsFilter<T>::serializeGestaltMatrix(const Matrix& gestaltFeatures
 template<typename T>
 typename PointMatcher<T>::Vector
 GestaltDataPointsFilter<T>::calculateAngles(
-	const Matrix& points, const Eigen::Matrix<T,3,1>& keyPoint) const
+	const Matrix& points, const Eigen::Matrix<T,3,1>& /*keyPoint*/) const
 {
 	const unsigned int dim(points.cols());
   Vector angles(dim);
@@ -614,7 +614,7 @@ GestaltDataPointsFilter<T>::calculateAngles(
 template<typename T>
 typename PointMatcher<T>::Vector
 GestaltDataPointsFilter<T>::calculateRadii(
-	const Matrix& points, const Eigen::Matrix<T,3,1>& keyPoint) const
+	const Matrix& points, const Eigen::Matrix<T,3,1>& /*keyPoint*/) const
 {
 	const unsigned int dim(points.cols());
   Vector radii(dim);

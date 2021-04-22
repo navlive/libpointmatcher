@@ -91,7 +91,7 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 
 //! Hook to load addition subclass-specific content from the YAML file
 template<typename T>
-void PointMatcher<T>::ICPChainBase::loadAdditionalYAMLContent(YAML::Node& doc)
+void PointMatcher<T>::ICPChainBase::loadAdditionalYAMLContent(YAML::Node& /*doc*/)
 {
 }
 

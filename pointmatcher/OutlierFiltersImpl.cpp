@@ -51,8 +51,8 @@ using namespace PointMatcherSupport;
 // NullOutlierFilter
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
+	const DataPoints& /*filteredReading*/,
+	const DataPoints& /*filteredReference*/,
 	const Matches& input)
 {
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
@@ -73,8 +73,8 @@ OutlierFiltersImpl<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Paramete
 
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MaxDistOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
+	const DataPoints& /*filteredReading*/,
+	const DataPoints& /*filteredReference*/,
 	const Matches& input)
 {
 	return OutlierWeights((input.dists.array() <= maxDist).template cast<T>());
@@ -93,8 +93,8 @@ OutlierFiltersImpl<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Paramete
 
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MinDistOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
+	const DataPoints& /*filteredReading*/,
+	const DataPoints& /*filteredReference*/,
 	const Matches& input)
 {
 	return OutlierWeights((input.dists.array() >= minDist).template cast<T>());
@@ -115,8 +115,8 @@ OutlierFiltersImpl<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const Pa
 
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MedianDistOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
+	const DataPoints& /*filteredReading*/,
+	const DataPoints& /*filteredReference*/,
 	const Matches& input)
 {
 	const T median = input.getDistsQuantile(0.5);
@@ -138,8 +138,8 @@ OutlierFiltersImpl<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const 
 
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
+	const DataPoints& /*filteredReading*/,
+	const DataPoints& /*filteredReference*/,
 	const Matches& input)
 {
 	const T limit = input.getDistsQuantile(ratio);
@@ -165,8 +165,8 @@ OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(
 
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
+	const DataPoints& /*filteredReading*/,
+	const DataPoints& /*filteredReference*/,
 	const Matches& input)
 {
 	const T tunedRatio = optimizeInlierRatio(input);
@@ -306,7 +306,7 @@ OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter::GenericDescriptorOutlierF
 
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter::compute(
-	const DataPoints& filteredReading,
+	const DataPoints& /*filteredReading*/,
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
