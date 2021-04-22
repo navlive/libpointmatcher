@@ -156,4 +156,4 @@ size_t argMax(const typename PointMatcher<T>::Vector& v)
 	return maxIdx;
 }
 
-};
+}

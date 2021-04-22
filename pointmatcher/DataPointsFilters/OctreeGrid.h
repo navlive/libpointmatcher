@@ -35,7 +35,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "PointMatcher.h"
-#include "utils/octree.h"
 
 #include <unordered_map>
 
@@ -86,71 +85,9 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	}
 
 public:
-//Visitors class to apply processing
-	struct FirstPtsSampler
-	{
-		std::size_t idx;
-		DataPoints&	pts;
 
-		//Build map of (old index to new index), 
-		// in case we sample pts at the begining of the pointcloud
-		std::unordered_map<std::size_t, std::size_t> mapidx;
-
-		FirstPtsSampler(DataPoints& dp);
-		virtual ~FirstPtsSampler(){}
-		
-		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);
-		
-		virtual bool finalize();
-	};
-	struct RandomPtsSampler : public FirstPtsSampler
-	{
-		using FirstPtsSampler::idx;
-		using FirstPtsSampler::pts;
-		using FirstPtsSampler::mapidx;
-		
-		const std::size_t seed;
-	
-		RandomPtsSampler(DataPoints& dp);
-		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
-		virtual ~RandomPtsSampler(){}
-	
-		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);
-		
-		virtual bool finalize();
-	};
-	struct CentroidSampler : public FirstPtsSampler
-	{
-		using FirstPtsSampler::idx;
-		using FirstPtsSampler::pts;
-		using FirstPtsSampler::mapidx;
-		
-		CentroidSampler(DataPoints& dp);
-	
-		virtual ~CentroidSampler(){}
-	
-		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);
-	};
-	//Nearest point from the centroid (contained in the cloud)
-	struct MedoidSampler : public FirstPtsSampler
-	{
-		using FirstPtsSampler::idx;
-		using FirstPtsSampler::pts;
-		using FirstPtsSampler::mapidx;
-		
-		MedoidSampler(DataPoints& dp);
-	
-		virtual ~MedoidSampler(){}
-	
-		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);		
-	};
-
-//-------	
-	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2, MEDOID=3 };
+//Sampling method enumerate
+	enum class SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2, MEDOID=3 };
 
 //Atributes
 	bool buildParallel;

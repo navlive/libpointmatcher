@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "utils.h"
 
 /*!
- * \class octree.h
+ * \class Octree.h
  * \brief Octree class for DataPoints spatial representation
  *
  * \author Mathieu Labussiere (<mathieu dot labu at gmail dot com>)
@@ -158,7 +158,7 @@ public:
 	bool visit(Callback& cb);
 };
 	
-#include "octree.hpp"
+#include "Octree.tpp"
 
 template<typename T> using Quadtree = Octree_<T,2>;
 template<typename T> using Octree = Octree_<T,3>;

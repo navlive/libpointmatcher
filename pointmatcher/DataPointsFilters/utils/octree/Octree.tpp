@@ -32,11 +32,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-#include "octree.h"
 
 #include <iterator>
 #include <future>
 #include <ciso646>
+
+#include "OctreeLookupTable.h"
 
 template<typename T, std::size_t dim>
 Octree_<T,dim>::Octree_(): parent{nullptr},	depth{0}
@@ -221,7 +222,7 @@ Octree_<T,dim>* Octree_<T,dim>::operator[](size_t idx)
 }
 
 template<typename T, std::size_t dim>
-typename Octree_<T,dim>::DataContainer Octree_<T,dim>::toData(const DP& pts, const std::vector<Id>& ids)
+typename Octree_<T,dim>::DataContainer Octree_<T,dim>::toData(const DP& /*pts*/, const std::vector<Id>& ids)
 {
 	return DataContainer{ids.begin(), ids.end()};
 }
@@ -264,42 +265,6 @@ bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode,
 	return this->build(pts, std::move(datas), std::move(box), maxDataByNode, maxSizeByNode, parallelBuild);
 }
 
-//Offset lookup table
-template<typename T, std::size_t dim>
-struct OctreeHelper;
-
-template<typename T>
-struct OctreeHelper<T,3>
-{
-	static const typename Octree_<T,3>::Point offsetTable[Octree_<T,3>::nbCells];
-};
-template<typename T>
-const typename Octree_<T,3>::Point OctreeHelper<T,3>::offsetTable[Octree_<T,3>::nbCells] = 
-		{
-			{-0.5, -0.5, -0.5},
-			{+0.5, -0.5, -0.5},
-			{-0.5, +0.5, -0.5},
-			{+0.5, +0.5, -0.5},
-			{-0.5, -0.5, +0.5},
-			{+0.5, -0.5, +0.5},
-			{-0.5, +0.5, +0.5},
-			{+0.5, +0.5, +0.5}
-		};
-
-template<typename T>
-struct OctreeHelper<T,2>
-{
-	static const typename Octree_<T,2>::Point offsetTable[Octree_<T,2>::nbCells];
-};
-template<typename T>
-const typename Octree_<T,2>::Point OctreeHelper<T,2>::offsetTable[Octree_<T,2>::nbCells] = 
-		{
-			{-0.5, -0.5},
-			{+0.5, -0.5},
-			{-0.5, +0.5},
-			{+0.5, +0.5}
-		};
-
 template<typename T, std::size_t dim>
 bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, 
 	size_t maxDataByNode, T maxSizeByNode, bool parallelBuild)
@@ -335,7 +300,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<nbCells; ++i)
 	{
-		const Point offset = OctreeHelper<T,dim>::offsetTable[i] * this->bb.radius;
+		const Point offset = OctreeLookupTable<T,dim>::offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
