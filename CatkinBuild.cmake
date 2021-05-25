@@ -118,6 +118,7 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/Matcher.cpp
       utest/ui/Outliers.cpp
       utest/ui/Transformations.cpp
+      utest/ui/octree/Octree.cpp
   )
   add_dependencies(test_pointmatcher
     pointmatcher

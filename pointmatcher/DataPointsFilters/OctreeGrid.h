@@ -101,13 +101,16 @@ public:
 	//Constructor, uses parameter interface
 	OctreeGridDataPointsFilter(const Parameters& params = Parameters());
 
-	OctreeGridDataPointsFilter();
-	// Destr
-	virtual ~OctreeGridDataPointsFilter() {};
+	// Destructor.
+	virtual ~OctreeGridDataPointsFilter() = default;
 
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 
 private:
-	template<std::size_t dim> void sample(DataPoints& cloud);
+	static constexpr std::size_t featDimension2d{3};
+	static constexpr std::size_t featDimension3d{4};
+
+	template<std::size_t dim>
+	void sample(DataPoints& cloud);
 };

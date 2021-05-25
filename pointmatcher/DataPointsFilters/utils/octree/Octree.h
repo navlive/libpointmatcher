@@ -87,14 +87,20 @@ public:
 	
 	using Point = Eigen::Matrix<T,dim,1>;
 	
-//private:
-	static constexpr std::size_t nbCells = PointMatcherSupport::pow(2, dim);
+	// Number of cells. Every node in the octree has nbCells children.
+	// Example: in an octree with dimension 3, every node has 2^3=8 children.
+	static constexpr std::size_t nbCells{PointMatcherSupport::pow(2, dim)};
 	
 private:
+	/**
+	 * @brief Bounding box.
+	 * Represents a spherical bounding box.
+	 * 
+	 */
 	struct BoundingBox 
 	{
-			Point center;
-			T 	radius;
+		Point center;
+		T radius;
 	};
 	
 	Octree_* parent;
@@ -126,7 +132,7 @@ public:
 	
 	virtual ~Octree_();
 	
-	Octree_<T,dim>& operator=(const Octree_<T,dim>& o);//Deep-copy
+	Octree_<T,dim>& operator=(const Octree_<T,dim>& o); // Deep-copy
 	Octree_<T,dim>& operator=(Octree_<T,dim>&& o);
 	
 	bool isLeaf() const;
@@ -141,7 +147,7 @@ public:
 	T getRadius() const;
 	Point getCenter() const;
 	
-	DataContainer * getData();
+	DataContainer* getData();
 	Octree_<T, dim>* operator[](std::size_t idx);
 	
 	// Build tree from DataPoints with a specified stop parameter

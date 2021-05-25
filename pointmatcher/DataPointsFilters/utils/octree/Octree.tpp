@@ -42,31 +42,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<typename T, std::size_t dim>
 Octree_<T,dim>::Octree_(): parent{nullptr},	depth{0}
 {
-	for(size_t i=0; i< nbCells; ++i) cells[i]=nullptr;
+	for(size_t i=0; i< nbCells; ++i)
+		cells[i] = nullptr;
 }
 
 template<typename T, std::size_t dim>
 Octree_<T,dim>::Octree_(const Octree_<T,dim>& o): 
 	bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
-	if (!o.parent) 
+	if (!o.parent) // Root case
 		parent = nullptr;	
 		
-	if(o.isLeaf()) //Leaf case
+	if(o.isLeaf()) // Leaf case
 	{
-		//nullify childs
+		// Nullify childs.
 		for(size_t i=0; i<nbCells; ++i)
 			cells[i]= nullptr;
-		//Copy data
+		// Copy data.
 		data.insert(data.end(), o.data.begin(), o.data.end());
 	}
-	else //Node case
+	else // Node case
 	{
 		//Create each child recursively
 		for(size_t i=0; i<nbCells;++i)
 		{
+			// Create a copy of the child, calling this copy constructor until we reach a leaf.
 			cells[i] = new Octree_<T,dim>(*(o.cells[i]));	
-			//Assign parent  	
+
+			// Assign parent to the child copy.
 			cells[i]->parent = this;
 		}	
 	}
@@ -75,57 +78,63 @@ template<typename T, std::size_t dim>
 Octree_<T,dim>::Octree_(Octree_<T,dim>&& o): 
 	parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
-	//only allow move of root node
+	// Only allow move of root node
 	assert(o.isRoot());
 
-	if(o.isLeaf()) //Leaf case
+	if(o.isLeaf()) // Leaf case
 	{
-		//Copy data
+		// Move data
 		data.insert(data.end(), 
 			std::make_move_iterator(o.data.begin()), 
 			std::make_move_iterator(o.data.end()));
 	}
-	//copy child ptr
+	// Move childs.
 	for(size_t i=0; i<nbCells; ++i)
 	{
+		// Direct assignment of child.
 		cells[i] = o.cells[i];
-		//Nullify ptrs
-		o.cells[i]=nullptr;
+
+		// Nullify ptrs of argument octree children.
+		o.cells[i] = nullptr;
 	}
 }
 
 template<typename T, std::size_t dim>
 Octree_<T,dim>::~Octree_()
 {
-	//delete recursively childs
+	// delete recursively childs
 	if(!isLeaf())
 		for(size_t i=0; i<nbCells; ++i)
 			delete cells[i];
 }
 
 template<typename T, std::size_t dim>	
-Octree_<T,dim>& Octree_<T,dim>::operator=(const Octree_<T,dim>&o)
+Octree_<T,dim>& Octree_<T,dim>::operator=(const Octree_<T,dim>& o)
 {
 	if (!o.parent) 
-		parent = nullptr;
-		
-	depth=o.depth;
+		parent = nullptr; // Root case
 	
-	if(o.isLeaf()) //Leaf case
+	// Set the depth of the octree to the same value.
+	depth = o.depth;
+	
+	if(o.isLeaf()) // Leaf case
 	{
-		//nullify childs
+		// Nullify children.
 		for(size_t i=0; i<nbCells; ++i)
 			cells[i]= nullptr;
-  		//Copy data
+
+  		// Copy data
   		data.insert(data.end(), o.data.begin(), o.data.end());
 	}
-	else //Node case
+	else // Node case
 	{
-		//Create each child recursively
+		// Create each child recursively
   		for(size_t i=0; i<nbCells; ++i)
   		{
+			  // Create a copy of the child, calling this copy constructor until we reach a leaf.
   			cells[i] = new Octree_<T,dim>(*(o.cells[i]));	
-			//Assign parent  	
+			
+			// Assign parent to the child copy.
   			cells[i]->parent = this;
   		}	
 	}
@@ -133,7 +142,7 @@ Octree_<T,dim>& Octree_<T,dim>::operator=(const Octree_<T,dim>&o)
 }
 
 template<typename T, std::size_t dim>	
-Octree_<T,dim>& Octree_<T,dim>::operator=(Octree_<T,dim>&&o)
+Octree_<T,dim>& Octree_<T,dim>::operator=(Octree_<T,dim>&& o)
 {
 	//only allow move of root node
 	assert(o.isRoot());
@@ -152,12 +161,14 @@ Octree_<T,dim>& Octree_<T,dim>::operator=(Octree_<T,dim>&&o)
 			std::make_move_iterator(o.data.end()));
 	}
 	
-	//copy childs ptrs
+	// Copy children through pointers.
 	for(size_t i=0; i<nbCells; ++i)
 	{
+		// Direct assignment of child.
 		cells[i] = o.cells[i];
-		//Nullify ptrs
-		o.cells[i]=nullptr;
+
+		// Nullify ptrs of argument octree children.
+		o.cells[i] = nullptr;
 	}
 	
 	return *this;
@@ -184,7 +195,10 @@ size_t Octree_<T,dim>::idx(const Point& pt) const
 	size_t id = 0;
 
 	for(size_t i=0; i<dim; ++i)
-		id|= ((pt(i) > bb.center(i)) << i);
+	{
+		const bool pointCoordinateLargerThanBoundingBoxCenter{pt(i) > bb.center(i)};
+		id |= (pointCoordinateLargerThanBoundingBoxCenter << i);
+	}
 
 	return id;
 }
@@ -210,7 +224,7 @@ typename Octree_<T,dim>::Point Octree_<T,dim>::getCenter() const
 	return bb.center;
 }
 template<typename T, std::size_t dim>
-typename Octree_<T,dim>::DataContainer * Octree_<T,dim>::getData()
+typename Octree_<T,dim>::DataContainer* Octree_<T,dim>::getData()
 {
 	return &data;
 }
@@ -236,32 +250,39 @@ bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode,
 	//Build bounding box
 	BoundingBox box;
 	
-	Vector minValues = pts.features.rowwise().minCoeff();
-	Vector maxValues = pts.features.rowwise().maxCoeff();
+	// Compute vector of minimum values, row-wise.
+	Vector minValues{pts.features.rowwise().minCoeff()};
+	Vector maxValues{pts.features.rowwise().maxCoeff()};
 	
-	Point min = minValues.head(dim);
-	Point max = maxValues.head(dim);
+	// Compute minimum and maximum values from the whole point cloud.
+	Point min{minValues.head(dim)};
+	Point max{maxValues.head(dim)};
 	
-	Point radii = max - min;
+	// Compute parameters of bounding box.
+	Point radii{max - min};
 	box.center = min + radii * 0.5;
-	
+
+	// Set radius to be the max of all radii.
 	box.radius = radii(0);
 	for(size_t i=1; i<dim; ++i)
-		if (box.radius < radii(i)) box.radius = radii(i);
-		
-	box.radius*=0.5;
+		if (box.radius < radii(i))
+			box.radius = radii(i);
 	
-	//Transform pts in data	
-	const size_t nbpts = pts.getNbPoints();
+	// Set the radius to half the measured max(radii).
+	box.radius *= 0.5;
+	
+	// Fill the data vector with indices of points in the point cloud.
+	const size_t numPoints{pts.getNbPoints()};
+
+	// TODO(ynava) This loop can be optimized by filling values with std::fil?
 	std::vector<Id> indexes;
-	indexes.reserve(nbpts);
-		
-	for(size_t i=0; i<nbpts; ++i)
+	indexes.reserve(numPoints);
+	for(size_t i=0; i<numPoints; ++i)
 		indexes.emplace_back(Id(i));
 	
 	DataContainer datas = toData(pts, indexes);
 	
-	//build
+	// Recursive call to build.
 	return this->build(pts, std::move(datas), std::move(box), maxDataByNode, maxSizeByNode, parallelBuild);
 }
 
@@ -269,52 +290,60 @@ template<typename T, std::size_t dim>
 bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, 
 	size_t maxDataByNode, T maxSizeByNode, bool parallelBuild)
 {
-	//Assign bounding box
+	// Assign bounding box parameters from parent's.
 	this->bb.center = bb.center;
 	this->bb.radius = bb.radius;
 
-	//Check stop condition
-	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= maxDataByNode))
+	// Validate stop condition.
+	if((bb.radius * 2.0 <= maxSizeByNode) or (datas.size() <= maxDataByNode))
 	{		
-		//insert data
+		// Insert data
 		data.insert(data.end(), 
-			std::make_move_iterator(datas.begin()), make_move_iterator(datas.end()));
+			std::make_move_iterator(datas.begin()), std::make_move_iterator(datas.end()));
 		return (isLeaf());
 	}
 	
-	//Split datas
-	const std::size_t nbData = datas.size();
-	
+	/* Potential for optimization */
+	/* In this block the data vector (size N) is split into multiple sections. The implementation reserves space
+	for M vectors of size N, appends the data, and then shrinks the vectors to their final size */
+	/* An alternative approach would be to pre-compute which points would go into each cell, and based on that allocate
+	space on each of the M vectors */
+	// Split data into cells.
+	const std::size_t nbData{datas.size()};
+
+	// Reserve space in vector for the data points.
 	DataContainer sDatas[nbCells];
 	for(size_t i=0; i<nbCells; ++i)
 		sDatas[i].reserve(nbData);
-		
+	
+	// Copy data points into this node's data vector.
 	for(auto&& d : datas)
 		(sDatas[idx(pts, d)]).emplace_back(d);
 	
+	// Shrink data container to fit content.
 	for(size_t i=0; i<nbCells; ++i)
 		sDatas[i].shrink_to_fit();
+	/* Potential for optimization */
 	
-	//Compute new bounding boxes
+	// Compute new bounding boxes for children.
 	BoundingBox boxes[nbCells];
-	const T half_radius = this->bb.radius * 0.5;
+	const T halfRadius{this->bb.radius * 0.5f};
 	for(size_t i=0; i<nbCells; ++i)
 	{
-		const Point offset = OctreeLookupTable<T,dim>::offsetTable[i] * this->bb.radius;
-		boxes[i].radius = half_radius;
+		const Point offset{OctreeLookupTable<T,dim>::offsetTable[i] * this->bb.radius};
+		boxes[i].radius = halfRadius;
 		boxes[i].center = this->bb.center + offset;
 	}
 	
-	//For each child build recursively
-	bool ret = true;
+	// For each child build bottom levels of the octree recursively.
+	bool ret{true};
 	std::vector<std::future<void>> futures;
-
 	for(size_t i=0; i<nbCells; ++i)
 	{		
 		auto compute = [maxDataByNode, maxSizeByNode, i, &pts, &sDatas, &boxes, this](){
 				this->cells[i] = new Octree_<T,dim>();
 				//Assign depth
-				this->cells[i]->depth = this->depth+1;
+				this->cells[i]->depth = this->depth + 1;
 				//Assign parent
 				this->cells[i]->parent = this;
 				//next call is not parallelizable
@@ -327,6 +356,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 			compute();
 	}
 
+	// If parallel build is enabled, wait for the octree to be ready.
 	for(auto& f : futures) f.get();
 
 	return (!isLeaf() and ret);

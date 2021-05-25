@@ -69,52 +69,58 @@ OctreeGridDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	const std::size_t featDim = cloud.features.rows();
+	// Compute the dimension of the point cloud features.
+	const std::size_t featDim{static_cast<std::size_t>(cloud.features.rows())};
 	
 	assert(featDim == 4 or featDim == 3);
 
-	if(featDim==3) //2D case
+	// Dispatch to dimension-specific filters.
+	if(featDim == featDimension2d) {
+		// Quadtree, 3D case.
 		this->sample<2>(cloud);
-		
-	else if(featDim==4) //3D case
+	}
+	else if(featDim == featDimension3d) {
+		// Octree, 3D case.
 		this->sample<3>(cloud);
+	}
 }
 
 template<typename T>
 template<std::size_t dim>
 void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
 {
-	Octree_<T,dim> oc;
+	Octree_<T,dim> octree;
 	
-	oc.build(cloud, maxPointByNode, maxSizeByNode, buildParallel);
+	octree.build(cloud, maxPointByNode, maxSizeByNode, buildParallel);
 	
+	// Dispatch 
 	switch(samplingMethod)
 	{
 		case SamplingMethod::FIRST_PTS:
 		{
 			FirstPtsSampler<T> sampler(cloud);
-			oc.visit(sampler);
+			octree.visit(sampler);
 			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::RAND_PTS:
 		{
 			RandomPtsSampler<T> sampler(cloud); //FIXME: add seed parameter
-			oc.visit(sampler);
+			octree.visit(sampler);
 			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::CENTROID:
 		{
 			CentroidSampler<T> sampler(cloud);
-			oc.visit(sampler);
+			octree.visit(sampler);
 			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::MEDOID:
 		{
 			MedoidSampler<T> sampler(cloud);
-			oc.visit(sampler);
+			octree.visit(sampler);
 			sampler.finalize();
 			break;
 		}
