@@ -1,5 +1,5 @@
 # Set compiler flags
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
