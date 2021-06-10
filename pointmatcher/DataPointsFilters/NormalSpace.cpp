@@ -90,7 +90,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
 
 	//bucketed normal space
-	std::vector<std::vector<int> > idBuckets;
+	std::vector<std::vector<int>> idBuckets;
 	idBuckets.resize(nbBucket);
 
 	std::vector<std::size_t> keepIndexes;
@@ -117,7 +117,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 		// Catch normal space hashing errors
 		assert(bucketIdx(theta, phi) < nbBucket);
-		idBuckets[bucketIdx(theta, phi)].push_back(randIdx);
+		idBuckets[bucketIdx(theta, phi)].emplace_back(randIdx);
 	}
 
 	// Remove empty buckets
@@ -136,7 +136,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		///(3) A point is randomly picked in a bucket that contains multiple points
 		int idToKeep = curBucket[curBucket.size()-1];
 		curBucket.pop_back();
-		keepIndexes.push_back(static_cast<std::size_t>(idToKeep));
+		keepIndexes.emplace_back(static_cast<std::size_t>(idToKeep));
 
 		// Remove the bucket if it is empty
 		if (curBucket.empty()) {
@@ -146,7 +146,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	//TODO: evaluate performances between this solution and sorting the indexes
 	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
-	std::unordered_map<std::size_t, std::size_t> mapidx;
+	std::unordered_map<std::size_t, std::size_t> mapidx{nbSample};
 	std::size_t idx = 0;
 
 	///(4) Sample the point cloud

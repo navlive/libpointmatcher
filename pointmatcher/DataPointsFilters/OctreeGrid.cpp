@@ -44,7 +44,8 @@ OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& para
 		OctreeGridDataPointsFilter::availableParameters(), params),
 	buildParallel{Parametrizable::get<bool>("buildParallel")},
 	maxPointByNode{Parametrizable::get<std::size_t>("maxPointByNode")},
-	maxSizeByNode{Parametrizable::get<T>("maxSizeByNode")}
+	maxSizeByNode{Parametrizable::get<T>("maxSizeByNode")},
+	centerAtOrigin{Parametrizable::get<bool>("centerAtOrigin")}
 {
 	try 
 	{
@@ -91,7 +92,7 @@ void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
 {
 	Octree_<T,dim> octree;
 	
-	octree.build(cloud, maxPointByNode, maxSizeByNode, buildParallel);
+	octree.build(cloud, maxPointByNode, maxSizeByNode, buildParallel, centerAtOrigin);
 	
 	// Dispatch 
 	switch(samplingMethod)

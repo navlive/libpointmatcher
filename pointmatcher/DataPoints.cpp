@@ -128,29 +128,29 @@ PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels,
 
 //! Construct a point cloud from existing features without any descriptor
 template<typename T>
-PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels):
-	features(features),
-	featureLabels(featureLabels)
+PointMatcher<T>::DataPoints::DataPoints(Matrix features, Labels featureLabels):
+	features(std::move(features)),
+	featureLabels(std::move(featureLabels))
 {}
 
 //! Construct a point cloud from existing features and descriptors
 template<typename T>
-PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels):
-	features(features),
-	featureLabels(featureLabels),
-	descriptors(descriptors),
-	descriptorLabels(descriptorLabels)
+PointMatcher<T>::DataPoints::DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels):
+	features(std::move(features)),
+	featureLabels(std::move(featureLabels)),
+	descriptors(std::move(descriptors)),
+	descriptorLabels(std::move(descriptorLabels))
 {}
 
 //! Construct a point cloud from existing features, descriptors and times
 template<typename T>
-PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels):
-	features(features),
-	featureLabels(featureLabels),
-	descriptors(descriptors),
-	descriptorLabels(descriptorLabels),
-	times(times),
-	timeLabels(timeLabels)
+PointMatcher<T>::DataPoints::DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels, Int64Matrix times, Labels timeLabels):
+	features(std::move(features)),
+	featureLabels(std::move(featureLabels)),
+	descriptors(std::move(descriptors)),
+	descriptorLabels(std::move(descriptorLabels)),
+	times(std::move(times)),
+	timeLabels(std::move(timeLabels))
 {}
 
 //! Return the number of points contained in the point cloud

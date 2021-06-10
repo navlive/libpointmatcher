@@ -79,7 +79,8 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 			{"buildParallel", "If 1 (true), use threads to build the octree.", "1", "0", "1", P::Comp<bool>},
 			{"maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t>},
 			{"maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0", "0", "+inf", &P::Comp<T>},
-			{"samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly)", "0", "0", "3", &P::Comp<int>}
+			{"samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly)", "0", "0", "3", &P::Comp<int>},
+			{"centerAtOrigin", "If 1 (true), centers the octree grid at the origin. If 0 (false) computes the origin based on the input data.", "1", "0", "1", P::Comp<bool>}
 		//FIXME: add seed parameter for the random sampling
 		};
 	}
@@ -96,6 +97,8 @@ public:
 	T           maxSizeByNode;
 	
 	SamplingMethod samplingMethod;
+
+	bool centerAtOrigin;
 
 //Methods	
 	//Constructor, uses parameter interface

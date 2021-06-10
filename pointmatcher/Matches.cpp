@@ -44,9 +44,9 @@ PointMatcher<T>::Matches::Matches() {}
 
 //! Construct matches from distances to and identifiers of closest points
 template<typename T>
-PointMatcher<T>::Matches::Matches(const Dists& dists, const Ids ids):
-	dists(dists),
-	ids(ids)
+PointMatcher<T>::Matches::Matches(Dists dists, Ids ids):
+	dists(std::move(dists)),
+	ids(std::move(ids))
 {}
 
 //! Construct uninitialized matches from number of closest points (knn) and number of points (pointsCount)

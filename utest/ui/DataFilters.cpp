@@ -454,15 +454,16 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 
 	std::shared_ptr<PM::DataPointsFilter> octreeFilter;
 	
-	for(const int meth : {0,1,2,3})
+	for(const int samplingMethod : {0})
 		for(const size_t maxData : {1,5})
 			for(const float maxSize : {0.,0.05})
 			{
 				params.clear();
 				params["maxPointByNode"] = toParam(maxData);
 				params["maxSizeByNode"] = toParam(maxSize);
-				params["samplingMethod"] = toParam(meth);
+				params["samplingMethod"] = toParam(samplingMethod);
 				params["buildParallel"] = "1";
+				params["centerAtOrigin"] = "1";
 	
 				octreeFilter = PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
 

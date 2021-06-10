@@ -341,6 +341,7 @@ __Impact on the number of points:__ reduces number of points
 |maxPointByNode	| number of point under which the octree stop dividing | 1 | min: 1, max: 4294967295 |
 |maxSizeByNode	| size of the bounding box under which the octree stop dividing | 0.0 | min: 0.0, max: +inf |
 |samplingMethod	| method to sample the octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly) | 0 | min: 0, max: 3 |
+|centerAtOrigin	|| flag for determining whether the octree grid should be centered at the origin (true) or the center should be computed based on the input data. | true (1) | 0 or 1 |
 
 ### Example
 The following example uses a structured point cloud from the apartment dataset. As the pointcloud is structured we use the size criterion set to 20 cm to decompose the point cloud. In each leaf, we took the _centroid_ (bottom) or the _medoid_ (top) colored in green (output points), where the color of the pointcloud represents the indexes in the octree.

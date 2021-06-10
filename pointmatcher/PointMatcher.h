@@ -257,9 +257,9 @@ struct PointMatcher
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const Labels& timeLabels, const size_t pointCount);
 
 		// Copy constructors from partial data
-		DataPoints(const Matrix& features, const Labels& featureLabels);
-		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
-		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels);
+		DataPoints(Matrix features, Labels featureLabels);
+		DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels);
+		DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels, Int64Matrix times, Labels timeLabels);
 
 		bool operator ==(const DataPoints& that) const;
 
@@ -377,7 +377,7 @@ struct PointMatcher
 		static constexpr T InvalidDist = std::numeric_limits<T>::infinity(); //! In case of too few matches the dists are filled with InvalidDist
 
 		Matches();
-		Matches(const Dists& dists, const Ids ids);
+		Matches(Dists dists, Ids ids);
 		Matches(const int knn, const int pointsCount);
 
 		Dists dists; //!< squared distances to closest points
@@ -717,10 +717,22 @@ struct PointMatcher
 		TransformationParameters compute(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
-			const TransformationParameters& initialTransformationParameters);
+			const TransformationParameters& initialTransformationParameters,
+			const bool initializeMatcherWithInputReference = true);
+
+		bool initReference(const DataPoints& referenceIn);
 
 		//! Return the filtered point cloud reading used in the ICP chain
 		const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
+		//! Return the filtered point cloud reference used in the ICP chain
+		const DataPoints& getReferenceFiltered() const { return referenceFiltered; }
+
+		//! Return the transformation from reference to feature centroid.
+		const TransformationParameters& getTransformationReferenceToFeatureCentroid() const { return T_refIn_refMean; }
+
+		//! Return whether the matcher is initialized.
+		bool isMatcherInitialized() const { return matcherIsInitialized; }
 
 	protected:
 		TransformationParameters computeWithTransformedReference(
@@ -730,6 +742,12 @@ struct PointMatcher
 			const TransformationParameters& initialTransformationParameters);
 
 		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
+		DataPoints referenceFiltered;
+
+		// Transformation from input frame to the center of mass of the reference point cloud.
+		TransformationParameters T_refIn_refMean;
+
+		bool matcherIsInitialized{false};
 	};
 
 	//! ICP alogrithm, taking a sequence of clouds and using a map
@@ -767,7 +785,6 @@ struct PointMatcher
 
 	protected:
 		DataPoints mapPointCloud; //!< point cloud of the map, always in global frame (frame of first point cloud)
-		TransformationParameters T_refIn_refMean; //!< offset for centered map
 	};
 
 	// ---------------------------------

@@ -209,6 +209,11 @@ size_t Octree_<T,dim>::idx(const DP& pts, const Data d) const
 	return idx(pts.features.col(d).head(dim));
 }
 template<typename T, std::size_t dim>
+const Octree_<T,dim>* Octree_<T,dim>::getCells() const
+{
+	return cells;
+}
+template<typename T, std::size_t dim>
 size_t Octree_<T,dim>::getDepth() const
 {
 	return depth;
@@ -243,7 +248,7 @@ typename Octree_<T,dim>::DataContainer Octree_<T,dim>::toData(const DP& /*pts*/,
 
 // Build tree from DataPoints with a specified number of points by node
 template<typename T, std::size_t dim>
-bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode, bool parallelBuild)
+bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode, bool parallelBuild, bool centerAtOrigin)
 {
 	typedef typename PM::Vector Vector;
 	
@@ -260,16 +265,16 @@ bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode,
 	
 	// Compute parameters of bounding box.
 	Point radii{max - min};
-	box.center = min + radii * 0.5;
+
+	if(centerAtOrigin) {
+		box.center = Point::Zero();
+	} else {
+		box.center = min + radii * 0.5;
+	}
 
 	// Set radius to be the max of all radii.
-	box.radius = radii(0);
-	for(size_t i=1; i<dim; ++i)
-		if (box.radius < radii(i))
-			box.radius = radii(i);
-	
-	// Set the radius to half the measured max(radii).
-	box.radius *= 0.5;
+	const double x{radii.maxCoeff() * 0.5};
+	box.radius = std::pow(2, std::ceil(std::log(x)/std::log(2)));
 	
 	// Fill the data vector with indices of points in the point cloud.
 	const size_t numPoints{pts.getNbPoints()};
@@ -300,7 +305,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 		// Insert data
 		data.insert(data.end(), 
 			std::make_move_iterator(datas.begin()), std::make_move_iterator(datas.end()));
-		return (isLeaf());
+		return isLeaf();
 	}
 	
 	/* Potential for optimization */
@@ -336,7 +341,6 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 	}
 	
 	// For each child build bottom levels of the octree recursively.
-	bool ret{true};
 	std::vector<std::future<void>> futures;
 	for(size_t i=0; i<nbCells; ++i)
 	{		
@@ -359,7 +363,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 	// If parallel build is enabled, wait for the octree to be ready.
 	for(auto& f : futures) f.get();
 
-	return (!isLeaf() and ret);
+	return !isLeaf();
 }
 
 //------------------------------------------------------------------------------

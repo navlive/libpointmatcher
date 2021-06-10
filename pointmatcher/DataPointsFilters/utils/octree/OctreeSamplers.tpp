@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Define Visitor classes to apply processing
 template<typename T>
 FirstPtsSampler<T>::FirstPtsSampler(DataPoints& dp) 
-	: idx{0}, pts(dp) 
+	: idx{0}, pts(dp), mapidx(pts.features.cols())
 {
 }
 

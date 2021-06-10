@@ -229,7 +229,7 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	//TODO: evaluate performances between this solution and sorting the indexes
 	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
-	std::unordered_map<std::size_t, std::size_t> mapidx;
+	std::unordered_map<std::size_t, std::size_t> mapidx{nbSample};
 	std::size_t idx = 0;
 	
 	///(4) Sample the point cloud
