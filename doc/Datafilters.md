@@ -387,6 +387,7 @@ __Impact on the number of points:__ reduces number of points
 |nbSample	| number of point to select | 5000 | min: 1, max: 4294967295|
 |seed	| seed for the random generator | 1 | min: 0, max: 4294967295 |
 |epsilon	| step of discretization for the angle spaces | PI/32 | min: PI/64, max: PI |
+|randomShuffle	| whether points should be randomly shuffled before sampling | 0 | min: 0, max: 1 |
 
 ### Example
 The following example uses a structured point cloud from the apartment dataset. The following gives the normal representation (on a sphere) of the original point cloud (we can clearly see that some areas are more populated) and the normal representation of the uniform sampled pointcloud (output).

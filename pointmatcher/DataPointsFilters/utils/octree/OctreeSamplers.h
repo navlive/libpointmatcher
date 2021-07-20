@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Octree.h"
 
-#include <unordered_map>
+#include <vector>
 
 template<typename T>
 struct OctreeSampler
@@ -56,9 +56,9 @@ struct FirstPtsSampler : public OctreeSampler<T>
     std::size_t idx;
     DataPoints& pts;
 
-    //Build map of (old index to new index),
+    //Build a vector to map the old indexes to new indexes,
     // in case we sample pts at the begining of the pointcloud
-    std::unordered_map<std::size_t, std::size_t> mapidx;
+    std::vector<std::size_t> indexVector;
 
     FirstPtsSampler(DataPoints& dp);
     virtual ~FirstPtsSampler() {}
@@ -74,7 +74,7 @@ struct RandomPtsSampler : public FirstPtsSampler<T>
 {
 	using typename FirstPtsSampler<T>::DataPoints;
     using FirstPtsSampler<T>::idx;
-    using FirstPtsSampler<T>::mapidx;
+    using FirstPtsSampler<T>::indexVector;
     using FirstPtsSampler<T>::pts;
 
     const std::size_t seed;
@@ -94,7 +94,7 @@ struct CentroidSampler : public FirstPtsSampler<T>
 {
 	using typename FirstPtsSampler<T>::DataPoints;
     using FirstPtsSampler<T>::idx;
-    using FirstPtsSampler<T>::mapidx;
+    using FirstPtsSampler<T>::indexVector;
     using FirstPtsSampler<T>::pts;
 
     CentroidSampler(DataPoints& dp);
@@ -111,7 +111,7 @@ struct MedoidSampler : public FirstPtsSampler<T>
 {
 	using typename FirstPtsSampler<T>::DataPoints;
     using FirstPtsSampler<T>::idx;
-    using FirstPtsSampler<T>::mapidx;
+    using FirstPtsSampler<T>::indexVector;
     using FirstPtsSampler<T>::pts;
 
     MedoidSampler(DataPoints& dp);

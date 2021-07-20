@@ -34,10 +34,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "CovarianceSampling.h"
 
-#include <vector>
 #include <list>
 #include <utility>
-#include <unordered_map>
+#include <vector>
 
 // Eigenvalues
 #include "Eigen/QR"
@@ -227,9 +226,10 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		keepIndexes[i] = candidates[idToKeep];
 	}
 
-	//TODO: evaluate performances between this solution and sorting the indexes
-	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
-	std::unordered_map<std::size_t, std::size_t> mapidx{nbSample};
+	// We build a vector to map old indexes to the new indexes, in case we sample pts at the beginning of the pointcloud
+	std::vector<std::size_t> indexVector;
+	indexVector.resize(nbSample);
+
 	std::size_t idx = 0;
 	
 	///(4) Sample the point cloud
@@ -237,11 +237,11 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	{
 		//retrieve index from lookup table if sampling in already switched element
 		if(id<idx)
-			id = mapidx[id];
+			id = indexVector[id];
 		//Switch columns id and idx
 		cloud.swapCols(idx, id);	
 		//Maintain new index position	
-		mapidx[idx] = id;
+		indexVector[idx] = id;
 		//Update index
 		++idx;
 	}

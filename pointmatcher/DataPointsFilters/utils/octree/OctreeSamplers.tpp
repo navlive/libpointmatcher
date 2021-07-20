@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Define Visitor classes to apply processing
 template<typename T>
 FirstPtsSampler<T>::FirstPtsSampler(DataPoints& dp) 
-	: idx{0}, pts(dp), mapidx(pts.features.cols())
+	: idx{0}, pts(dp), indexVector(pts.features.cols())
 {
 }
 
@@ -58,13 +58,13 @@ bool FirstPtsSampler<T>::operator()(Octree_<T,dim>& oc)
 		
 		//retrieve index from lookup table if sampling in already switched element
 		if(std::size_t(d)<idx)
-			j = mapidx[d];
+			j = indexVector[d];
 			
 		//Switch columns j and idx
 		pts.swapCols(idx, j);
 				
 		//Maintain new index position	
-		mapidx[idx] = j;
+		indexVector[idx] = j;
 		//Update index
 		++idx;		
 	}
@@ -114,13 +114,13 @@ bool RandomPtsSampler<T>::operator()(Octree_<T,dim>& oc)
 		
 		//retrieve index from lookup table if sampling in already switched element
 		if(std::size_t(d)<idx)
-			j = mapidx[d];
+			j = indexVector[d];
 			
 		//Switch columns j and idx
 		pts.swapCols(idx, j);	
 		
 		//Maintain new index position	
-		mapidx[idx] = j;
+		indexVector[idx] = j;
 		//Update index
 		++idx;		
 	}
@@ -162,7 +162,7 @@ bool CentroidSampler<T>::operator()(Octree_<T,dim>& oc)
 		
 		//retrieve index from lookup table if sampling in already switched element
 		if(std::size_t(d)<idx)
-			j = mapidx[d];
+			j = indexVector[d];
 		
 		//We sum all the data in the first data
 		for(std::size_t id=1;id<nbData;++id)
@@ -173,7 +173,7 @@ bool CentroidSampler<T>::operator()(Octree_<T,dim>& oc)
 			
 			//retrieve index from lookup table if sampling in already switched element
 			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
+				i = indexVector[curId];
 			
 			for (int f = 0; f < (featDim - 1); ++f)
 				pts.features(f,j) += pts.features(f,i);
@@ -203,7 +203,7 @@ bool CentroidSampler<T>::operator()(Octree_<T,dim>& oc)
 		pts.swapCols(idx, j);
 		
 		//Maintain new index position	
-		mapidx[idx] = j;
+		indexVector[idx] = j;
 		//Update index
 		++idx;		
 	}
@@ -241,7 +241,7 @@ bool MedoidSampler<T>::operator()(Octree_<T,dim>& oc)
 			
 			//retrieve index from lookup table if sampling in already switched element
 			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
+				i = indexVector[curId];
 			
 			for (std::size_t f = 0; f < dim; ++f)
 				center(f) += pts.features(f,i);	
@@ -260,7 +260,7 @@ bool MedoidSampler<T>::operator()(Octree_<T,dim>& oc)
 			
 			//retrieve index from lookup table if sampling in already switched element
 			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
+				i = indexVector[curId];
 				
 			const T curDist = dist(pts.features.col(i).head(dim), center);
 			if(curDist<minDist)
@@ -274,7 +274,7 @@ bool MedoidSampler<T>::operator()(Octree_<T,dim>& oc)
 		pts.swapCols(idx, medId);
 	
 		//Maintain new index position	
-		mapidx[idx] = medId;
+		indexVector[idx] = medId;
 	
 		//Update index
 		++idx;		

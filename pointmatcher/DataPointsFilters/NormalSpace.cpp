@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 #include <vector>
-#include <unordered_map>
 #include <random>
 #include <ciso646>
 #include <cmath>
@@ -50,6 +49,7 @@ NormalSpaceDataPointsFilter<T>::NormalSpaceDataPointsFilter(const Parameters& pa
 	nbSample{Parametrizable::get<std::size_t>("nbSample")},
 	seed{Parametrizable::get<std::size_t>("seed")},
 	epsilon{Parametrizable::get<T>("epsilon")},
+	randomShuffle{Parametrizable::get<bool>("randomShuffle")},
 	nbBucket{std::size_t(ceil(2.0 * M_PI / epsilon) * ceil(M_PI / epsilon))}
 {
 }
@@ -69,7 +69,7 @@ template <typename T>
 void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
 	//check dimension
-	const std::size_t featDim = cloud.features.rows();
+	const Index featDim{cloud.features.rows()};
 	if(featDim < 4) //3D case support only
 	{
 		std::cerr << "ERROR: NormalSpaceDataPointsFilter does not support 2D point cloud yet (does nothing)" << std::endl;
@@ -77,7 +77,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	}
 
 	//Check number of points
-	const int nbPoints = cloud.getNbPoints();
+	const Index nbPoints{cloud.getNbPoints()};
 	if(nbSample >= std::size_t(nbPoints))
 		return;
 
@@ -96,28 +96,42 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	std::vector<std::size_t> keepIndexes;
 	keepIndexes.reserve(nbSample);
 
-	// Generate a random sequence of indices so that elements are placed in buckets in random order
-	std::vector<std::size_t> randIdcs(nbPoints);
-	std::iota(randIdcs.begin(), randIdcs.end(), 0); // 0-nbPoints  TODO is there a way to do this with a generator?
-	std::random_shuffle(randIdcs.begin(), randIdcs.end());
+	// Generate a random sequence of indices so that elements are placed in buckets
+	std::vector<std::size_t> pointIndices(nbPoints);
+	std::iota(pointIndices.begin(), pointIndices.end(), 0); // 0-nbPoints
+	
+	// Points are shuffled randomly to ensure a uniform distribution of normals in the sampling set.
+	if(randomShuffle)
+	{
+		std::random_shuffle(pointIndices.begin(), pointIndices.end());
+	}
+
+	// We compute the spherical coordinate of the point cloud points based on their normal vectors.
+	// Reference: http://corysimon.github.io/articles/uniformdistn-on-sphere/
+	// Note that the coordinate conversion has been optimized for small point clouds (<100k points) by performing it
+	// in batch instead of selectively (to make it easy for the compiler to vectorize this operation)
+    const T twoPi{ 2. * M_PI };
+    const Eigen::Array<T, 1, Eigen::Dynamic> polarAngleOfNormals{ normals.row(2).array().acos() };
+    const Eigen::Array<T, 1, Eigen::Dynamic> azimuthAngleOfNormals{ normals.row(1).array().binaryExpr(
+        normals.row(0).array(), [&](float y, float x) { return std::fmod(std::atan2(y, x) + twoPi, twoPi); }) };
 
 	///(1) put all points of the data into buckets based on their normal direction
-	for (auto randIdx : randIdcs)
+	for (auto pointIndex : pointIndices)
 	{
 		// Allow for slight approximiation errors
-		assert(normals.col(randIdx).head(3).norm() >= 1.0-0.00001);
-		assert(normals.col(randIdx).head(3).norm() <= 1.0+0.00001);
+		assert(normals.col(pointIndex).head(3).norm() >= 1.0-0.00001);
+		assert(normals.col(pointIndex).head(3).norm() <= 1.0+0.00001);
 		// Catch errors where theta will be NaN
-		assert((normals(2,randIdx) <= 1.0) && (normals(2,randIdx) >= -1.0));
+		assert((normals(2,pointIndex) <= 1.0) && (normals(2, pointIndex) >= -1.0));
 
 		//Theta = polar angle in [0 ; pi]
-		const T theta = std::acos(normals(2, randIdx));
+		const T theta{polarAngleOfNormals(pointIndex)};
 		//Phi = azimuthal angle in [0 ; 2pi]
-		const T phi = std::fmod(std::atan2(normals(1, randIdx), normals(0, randIdx)) + 2. * M_PI, 2. * M_PI);
+		const T phi{azimuthAngleOfNormals(pointIndex)};
 
 		// Catch normal space hashing errors
 		assert(bucketIdx(theta, phi) < nbBucket);
-		idBuckets[bucketIdx(theta, phi)].emplace_back(randIdx);
+		idBuckets[bucketIdx(theta, phi)].emplace_back(pointIndex);
 	}
 
 	// Remove empty buckets
@@ -129,36 +143,37 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	for (std::size_t i=0; i<nbSample; i++)
 	{
 		// Get a random bucket
-		std::uniform_int_distribution<std::size_t> uniBucket(0,idBuckets.size()-1);
-		std::size_t curBucketIdx = uniBucket(gen);
-		std::vector<int>& curBucket = idBuckets[curBucketIdx];
+		std::uniform_int_distribution<std::size_t> uniBucket(0, idBuckets.size()-1);
+		const std::size_t curBucketIdx{uniBucket(gen)};
+		std::vector<int>& curBucket{idBuckets[curBucketIdx]};
 
 		///(3) A point is randomly picked in a bucket that contains multiple points
-		int idToKeep = curBucket[curBucket.size()-1];
+		const int idToKeep{curBucket[curBucket.size()-1]};
 		curBucket.pop_back();
 		keepIndexes.emplace_back(static_cast<std::size_t>(idToKeep));
 
 		// Remove the bucket if it is empty
 		if (curBucket.empty()) {
-			idBuckets.erase(idBuckets.begin()+curBucketIdx);
+			idBuckets.erase(idBuckets.begin() + curBucketIdx);
 		}
 	}
 
 	//TODO: evaluate performances between this solution and sorting the indexes
 	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
-	std::unordered_map<std::size_t, std::size_t> mapidx{nbSample};
-	std::size_t idx = 0;
+	std::vector<std::size_t> indexVector;
+	indexVector.resize(nbSample);
 
 	///(4) Sample the point cloud
+	std::size_t idx{0};
 	for(std::size_t id : keepIndexes)
 	{
 		//retrieve index from lookup table if sampling in already switched element
 		if(id<idx)
-			id = mapidx[id];
+			id = indexVector[id];
 		//Switch columns id and idx
 		cloud.swapCols(idx, id);
 		//Maintain new index position
-		mapidx[idx] = id;
+		indexVector[idx] = id;
 		//Update index
 		++idx;
 	}
