@@ -304,7 +304,7 @@ bool PointMatcher<T>::ICP::initReference(const DataPoints& referenceIn) {
 	}
 	
 	// Reset reference and transformation.
-	const size_t dim{referenceIn.features.rows()};
+	const long int dim{referenceIn.features.rows()};
 	this->referenceFiltered = referenceIn;
 
 	// Reset transformation from reference frame to reference centroid.

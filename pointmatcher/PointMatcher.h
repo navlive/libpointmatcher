@@ -166,6 +166,8 @@ struct PointMatcher
 	typedef std::vector<Quaternion, Eigen::aligned_allocator<Quaternion> > QuaternionVector;
 	//! A dense matrix over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
+	//! A dense matrix of Eigen::Matrix::Index
+	typedef typename Eigen::Matrix<Eigen::Index, Eigen::Dynamic, Eigen::Dynamic> IndexMatrix;
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	//! A dense signed 64-bits matrix
@@ -209,19 +211,26 @@ struct PointMatcher
 		typedef Eigen::Block<Matrix> View;
 		//! A view on a time
 		typedef Eigen::Block<Int64Matrix> TimeView;
+		//! A view on the index grid
+		typedef Eigen::Block<Int64Matrix> IndexGridView;
 		//! A view on a const feature or const descriptor
 		typedef const Eigen::Block<const Matrix> ConstView;
 		//! a view on a const time
 		typedef const Eigen::Block<const Int64Matrix> TimeConstView;
 		//! An index to a row or a column
 		typedef typename Matrix::Index Index;
+		//! a view on the index grid
+		typedef const Eigen::Block<const Index> IndexGridConstView;
+
+		//! Default value of index grid for non-existing points
+		static constexpr Index EmptyGridValue{-1};
 
 		//! The name for a certain number of dim
 		struct Label
 		{
 			std::string text; //!< name of the label
 			size_t span; //!< number of data dimensions the label spans
-			Label(const std::string& text = "", const size_t span = 0);
+			Label(std::string text = "", size_t span = 0);
 			bool operator ==(const Label& that) const;
 		};
 		//! A vector of Label
@@ -245,6 +254,14 @@ struct PointMatcher
 			};
 		};
 
+		//! Index to reflect the point cloud ordering as a 2D grid
+		struct GridIndex {
+			Index row;
+			Index col;
+			GridIndex(Index row, Index col);
+			bool operator ==(const GridIndex& that) const;
+		};
+
 		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions
 		struct InvalidField: std::runtime_error
 		{
@@ -254,11 +271,13 @@ struct PointMatcher
 		// Constructors from descriptions (reserve memory)
 		DataPoints();
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
+		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t width, const size_t height);
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const Labels& timeLabels, const size_t pointCount);
 
 		// Copy constructors from partial data
 		DataPoints(Matrix features, Labels featureLabels);
 		DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels);
+		DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels, IndexMatrix indexGrid);
 		DataPoints(Matrix features, Labels featureLabels, Matrix descriptors, Labels descriptorLabels, Int64Matrix times, Labels timeLabels);
 
 		bool operator ==(const DataPoints& that) const;
@@ -269,6 +288,8 @@ struct PointMatcher
 		unsigned getNbGroupedDescriptors() const;
 		unsigned getDescriptorDim() const;
 		unsigned getTimeDim() const;
+		unsigned getWidth() const;
+		unsigned getHeight() const;
 
 		void save(const std::string& fileName, bool binary = false) const;
 		static DataPoints load(const std::string& fileName);
@@ -327,12 +348,23 @@ struct PointMatcher
 		unsigned getTimeStartingRow(const std::string& name) const;
 		void assertTimesConsistency() const;
 
+		// methods related to point organization
+		void allocateIndexGrid(Index width, Index height);
+		void deallocateIndexGrid();
+		Index computeLinearIndexFromGridIndex(Index rowIndex, Index colIndex) const;
+		GridIndex computeGridIndexFromLinearIndex(Index linearIndex) const;
+		Index& getIndexGridCell(Index linearIndex);
+		Index& getIndexGridCell(Index rowIndex, Index colIndex);
+		bool isOrganized() const;
+		void assertIndexGridConsistency() const;
+
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
 		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
 		Int64Matrix times; //!< time associated to each points, might be empty
 		Labels timeLabels; //!< labels of times.
+		IndexMatrix indexGrid; //!< mapping between a dense index for points and a 2D sensor-specific grid (point cloud ordering)
 
 	private:
 		void assertConsistency(const std::string& dataName, const int dataRows, const int dataCols, const Labels& labels) const;
