@@ -102,11 +102,16 @@ serializeEigVec(const typename PointMatcher<T>::Matrix& eigenVe)
 	return output;
 }
 
-template<typename T>
-T computeDensity(const typename PointMatcher<T>::Matrix& NN)
+template<typename T, typename Derived>
+T computeDensity(const Eigen::MatrixBase<Derived>& NN)
 {
-	//volume in meter
-	const T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff(), 3);
+	// Volume in meter
+	// V = 4/3 * pi * maxColWise(NN)^3
+	// 	 Note that we implement cubic power use a direct product instead of std::pow to maximize performance.
+	//   Reference https://baptiste-wicht.com/posts/2017/09/cpp11-performance-tip-when-to-use-std-pow.html
+	const T maxOfNNSquaredNorm{NN.colwise().squaredNorm().maxCoeff()};
+	const T volume{(4./3.) * M_PI * (maxOfNNSquaredNorm * std::sqrt(maxOfNNSquaredNorm))};
+	const T nbPoints{NN.cols()};
 
 	//volume in decimeter
 	//T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
@@ -116,8 +121,9 @@ T computeDensity(const typename PointMatcher<T>::Matrix& NN)
 	//if(volume < minVolume)
 	//	volume = minVolume;
 
-	return T(NN.cols())/(volume);
+	return (volume > 0) ? (nbPoints / volume) : 0;
 }
+
 template<typename T>
 typename PointMatcher<T>::Vector
 computeNormal(const typename PointMatcher<T>::Vector& eigenVa, const typename PointMatcher<T>::Matrix& eigenVe)
@@ -136,6 +142,23 @@ computeNormal(const typename PointMatcher<T>::Vector& eigenVa, const typename Po
 	}
 
   return eigenVe.col(smallestId);
+}
+
+/**
+ * @brief Computes the normal vector of a point patch based on a collection of ordered eigenvectors.
+ * @remark remark Uses the first eigenvector in the collection to compute the normal, following the
+ * convention from libeigen::SelfAdjointEigenSolver that eigenvectors and eigenvalues are stored in 
+ * increasing order of eigenvalue magnitude.
+ * 
+ * @tparam T 		Numeric type used to instantiate PointMatcher.
+ * @tparam DerivedA Type of eigenvalues vector.
+ * @tparam DerivedB Type of eigenvectors matrix.
+ */
+template<typename T, typename DerivedA, typename DerivedB>
+typename PointMatcher<T>::Vector
+computeNormalFromOrderedEigenvectors(const Eigen::MatrixBase<DerivedA>& /*eigenVa*/, const Eigen::MatrixBase<DerivedB>& eigenVe)
+{
+  return eigenVe.col(0);
 }
 
 template<typename T>

@@ -63,6 +63,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/CovarianceSampling.cpp
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
+	pointmatcher/DataPointsFilters/OrganizedCloudSurfaceNormal.cpp
 )
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")

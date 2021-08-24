@@ -62,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/CovarianceSampling.h"
 #include "DataPointsFilters/DistanceLimit.h"
 #include "DataPointsFilters/RemoveSensorBias.h"
+#include "DataPointsFilters/OrganizedCloudSurfaceNormal.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -92,6 +93,7 @@ struct DataPointsFiltersImpl
 	typedef ::CovarianceSamplingDataPointsFilter<T> CovarianceSamplingDataPointsFilter;
 	typedef ::DistanceLimitDataPointsFilter<T> DistanceLimitDataPointsFilter;
 	typedef ::RemoveSensorBiasDataPointsFilter<T> RemoveSensorBiasDataPointsFilter;
+	typedef ::OrganizedCloudSurfaceNormalDataPointsFilter<T> OrganizedCloudSurfaceNormalDataPointsFilter;
 
 }; // DataPointsFiltersImpl
 
