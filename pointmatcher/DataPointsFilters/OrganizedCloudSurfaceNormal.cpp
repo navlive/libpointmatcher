@@ -134,7 +134,7 @@ bool OrganizedCloudSurfaceNormalDataPointsFilter<T>::processPatchAroundPoint(con
             // Compute coordinates of neighbor.
             const Index neighborGridIndexRow{ centerGridIndex.row + rowOffset };
             const Index neighborGridIndexCol{ centerGridIndex.col + colOffset };
-            if (neighborGridIndexRow < 0 || neighborGridIndexCol < 0 || neighborGridIndexRow > nbRows || neighborGridIndexCol > nbCols)
+            if (neighborGridIndexRow < 0 || neighborGridIndexCol < 0 || neighborGridIndexRow >= nbRows || neighborGridIndexCol >= nbCols)
             {
                 // Skip point if it goes over the boundary of the index grid.
                 continue;
