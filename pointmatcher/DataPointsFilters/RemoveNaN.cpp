@@ -51,6 +51,12 @@ void RemoveNaNDataPointsFilter<T>::inPlaceFilter(
 {
 	const int nbPointsIn = cloud.features.cols();
 
+	// Given that this filter removes the structure from the linear array of points, there is no purpose for keeping the order of the 
+	// point cloud in the index grid anymore.
+	if(cloud.isOrganized()) {
+		cloud.deallocateIndexGrid();
+	}
+
 	int j = 0;
 	for (int i = 0; i < nbPointsIn; ++i)
 	{
