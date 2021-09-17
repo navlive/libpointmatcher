@@ -49,6 +49,7 @@ struct OrientNormalsDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::DataPoints::View View;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 	
 	inline static const std::string description()

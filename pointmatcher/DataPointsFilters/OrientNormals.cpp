@@ -65,27 +65,31 @@ void OrientNormalsDataPointsFilter<T>::inPlaceFilter(
 	if (!cloud.descriptorExists("observationDirections"))
 		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find observation directions in descriptors.");
 
-	BOOST_AUTO(normals, cloud.getDescriptorViewByName("normals"));
-	const BOOST_AUTO(observationDirections, cloud.getDescriptorViewByName("observationDirections"));
+	// Fetch descriptor fields.
+	View normals = cloud.getDescriptorViewByName("normals");
+	const View observationDirections = cloud.getDescriptorViewByName("observationDirections");
 	assert(normals.rows() == observationDirections.rows());
+
+	// Orient normals of every point.
 	const int featDim(cloud.features.cols());
 	for (int i = 0; i < featDim; ++i)
 	{
 		// Check normal orientation
-		const Vector vecP = observationDirections.col(i);
-		const Vector vecN = normals.col(i);
-		const double scalar = vecP.dot(vecN);
+		// Vector P = observationDirections.col(i)
+		// Vector N = normals.col(i)
+		// Angle cosine = vectorP.dot(vectorN)
+		const T scalar{observationDirections.col(i).dot(normals.col(i))};
 
 		// Swap normal
 		if(towardCenter)
 		{
 			if (scalar < 0)
-				normals.col(i) = -vecN;
+				normals.col(i) = -normals.col(i);
 		}
 		else
 		{
 			if (scalar > 0)
-				normals.col(i) = -vecN;
+				normals.col(i) = -normals.col(i);
 		}
 	}
 

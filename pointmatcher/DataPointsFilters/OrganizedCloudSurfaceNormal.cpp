@@ -65,6 +65,11 @@ void OrganizedCloudSurfaceNormalDataPointsFilter<T>::inPlaceFilter(DataPoints& c
 {
     using namespace PointMatcherSupport;
 
+    if (!cloud.isOrganized())
+    {
+        throw InvalidField("OrganizedCloudSurfaceNormalDataPointsFilter: Error, input point cloud is not organized.");
+    }
+
     // Reserve memory for new descriptors
     const Index nbRows{ cloud.getHeight() };
     const Index nbCols{ cloud.getWidth() };
@@ -170,7 +175,7 @@ bool OrganizedCloudSurfaceNormalDataPointsFilter<T>::processPatchAroundPoint(con
     // Compute mean and re-center collection of stacked points against the mean.
     const Vector mean{ selectedFeatures.leftCols(validNeighborsCounter).rowwise().sum() / T(validNeighborsCounter) };
     const Matrix NN{ selectedFeatures.leftCols(validNeighborsCounter).colwise() - mean };
-    const FixedSizeMatrix3 covariance{ NN * NN.transpose() / static_cast<T>(nbCols)};
+    const FixedSizeMatrix3 covariance{ NN * NN.transpose() / static_cast<T>(nbCols) };
 
     // Compute eigenvalues and eigenvectors of the covariance matrix.
     eigenSolver.computeDirect(covariance);

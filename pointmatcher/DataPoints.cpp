@@ -477,6 +477,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 }
 
 //! Set column thisCol equal to column thatCol of that, copy features and descriptors if any. Assumes sizes are similar
+//! If this function is called on an organized point cloud, it will make the point cloud order inconsistent.
 template<typename T>
 void PointMatcher<T>::DataPoints::setColFrom(Index thisCol, const DataPoints& that, Index thatCol)
 {
@@ -488,12 +489,11 @@ void PointMatcher<T>::DataPoints::setColFrom(Index thisCol, const DataPoints& th
 	if (times.cols() > 0)
 		times.col(thisCol) = that.times.col(thatCol);
 
-	if(isOrganized()) {
-		indexGrid(thisCol) = that.indexGrid(thatCol);
-		indexGrid(thatCol) = EmptyGridValue;
-	}
+	assert(isOrganized() == false);
 }
-//! Swap column i and j in the point cloud, swap also features and descriptors if any. Assumes sizes are similar
+
+//! Swap column i and j in the point cloud, swap also features and descriptors if any. Assumes sizes are similar.
+//! If this function is called on an organized point cloud, it will make the point cloud order inconsistent.
 template<typename T>
 void PointMatcher<T>::DataPoints::swapCols(Index iCol, Index jCol)
 {
@@ -507,10 +507,8 @@ void PointMatcher<T>::DataPoints::swapCols(Index iCol, Index jCol)
 		descriptors.col(iCol).swap(descriptors.col(jCol));
 	if (times.cols() > 0)
 		times.col(iCol).swap(times.col(jCol));
-
-	if(isOrganized()) {
-		std::swap(indexGrid(iCol), indexGrid(jCol));
-	}
+	
+	assert(isOrganized() == false);
 }
 
 //------------------------------------
