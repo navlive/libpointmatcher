@@ -106,8 +106,8 @@ void OrganizedCloudSurfaceNormalDataPointsFilter<T>::inPlaceFilter(DataPoints& c
             }
 
             const GridIndex centerGridIndex{ row, col };
-            const bool validNormal{ processPatchAroundPoint(
-                cloud, nbRows, nbCols, featDim, centerGridIndex, maxIndexOffset, eigenSolver, selectedFeatures, *normals, *densities) };
+            processPatchAroundPoint(
+                cloud, nbRows, nbCols, featDim, centerGridIndex, maxIndexOffset, eigenSolver, selectedFeatures, *normals, *densities);
         }
     }
 }

@@ -105,13 +105,16 @@ serializeEigVec(const typename PointMatcher<T>::Matrix& eigenVe)
 template<typename T, typename Derived>
 T computeDensity(const Eigen::MatrixBase<Derived>& NN)
 {
+	constexpr T threeQuarters{4./3.};
+	constexpr T pi{M_PI};
+
 	// Volume in meter
 	// V = 4/3 * pi * maxColWise(NN)^3
 	// 	 Note that we implement cubic power use a direct product instead of std::pow to maximize performance.
 	//   Reference https://baptiste-wicht.com/posts/2017/09/cpp11-performance-tip-when-to-use-std-pow.html
 	const T maxOfNNSquaredNorm{NN.colwise().squaredNorm().maxCoeff()};
-	const T volume{(4./3.) * M_PI * (maxOfNNSquaredNorm * std::sqrt(maxOfNNSquaredNorm))};
-	const T nbPoints{NN.cols()};
+	const T volume{threeQuarters * pi * (maxOfNNSquaredNorm * std::sqrt(maxOfNNSquaredNorm))};
+	const T nbPoints{static_cast<T>(NN.cols())};
 
 	//volume in decimeter
 	//T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
