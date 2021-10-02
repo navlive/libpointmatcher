@@ -95,6 +95,7 @@ struct OrganizedCloudSurfaceNormalDataPointsFilter : public PointMatcher<T>::Dat
     virtual void inPlaceFilter(DataPoints& cloud);
 
     template<typename Derived>
+    
     bool processPatchAroundPoint(const DataPoints& cloud, const Index& nbRows, const Index& nbCols, const Index& featDim,
                                  const GridIndex& centerGridIndex, const Index& maxIndexOffset,
                                  Eigen::SelfAdjointEigenSolver<FixedSizeMatrix3>& eigenSolver, Eigen::MatrixBase<Derived>& selectedFeatures,
