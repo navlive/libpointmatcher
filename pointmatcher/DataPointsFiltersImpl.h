@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_DATAPOINTSFILTERS_H
 
 #include "DataPointsFilters/Identity.h"
+#include "DataPointsFilters/HiddenPointRemoval.h"
 #include "DataPointsFilters/RemoveNaN.h"
 #include "DataPointsFilters/MaxDist.h"
 #include "DataPointsFilters/MinDist.h"
@@ -94,6 +95,7 @@ struct DataPointsFiltersImpl
 	typedef ::DistanceLimitDataPointsFilter<T> DistanceLimitDataPointsFilter;
 	typedef ::RemoveSensorBiasDataPointsFilter<T> RemoveSensorBiasDataPointsFilter;
 	typedef ::OrganizedCloudSurfaceNormalDataPointsFilter<T> OrganizedCloudSurfaceNormalDataPointsFilter;
+    typedef ::HiddenPointRemovalDataPointsFilter<T> HiddenPointRemovalDataPointsFilter;
 
 }; // DataPointsFiltersImpl
 

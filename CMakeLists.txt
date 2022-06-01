@@ -38,6 +38,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/Identity.cpp
 #DataPointsFilters	
 	pointmatcher/DataPointsFilters/Identity.cpp
+	pointmatcher/DataPointsFilters/HiddenPointRemoval.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
 	pointmatcher/DataPointsFilters/MinDist.cpp
