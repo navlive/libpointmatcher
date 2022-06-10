@@ -408,20 +408,18 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		
 		//-----------------------------
 		// Detect outliers
-		const OutlierWeights outlierWeights(
-			this->outlierFilters.compute(stepReading, reference, this->matches)
-		);
+		this->outlierWeights = this->outlierFilters.compute(stepReading, reference, this->matches);
 		
-		assert(outlierWeights.rows() == this->matches.ids.rows());
-		assert(outlierWeights.cols() == this->matches.ids.cols());
+		assert(this->outlierWeights.rows() == this->matches.ids.rows());
+		assert(this->outlierWeights.cols() == this->matches.ids.cols());
 		
-		//cout << "outlierWeights: " << outlierWeights << "\n";
+		// cout << "outlierWeights: " << this->outlierWeights << "\n";
 	
 		
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, T_iter, reference, stepReading, this->matches, outlierWeights, this->transformationCheckers
+			iterationCount, T_iter, reference, stepReading, this->matches, this->outlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
@@ -429,7 +427,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, this->matches) * T_iter;
+			stepReading, reference, this->outlierWeights, this->matches) * T_iter;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(

@@ -690,6 +690,7 @@ struct PointMatcher
 		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
 		DataPointsFilters referenceDataPointsFilters; //!< filters for reference
 		Matches matches; //!< data associations
+		OutlierWeights outlierWeights; //!< outlier weights
 		Transformations transformations; //!< transformations
 		std::shared_ptr<Matcher> matcher; //!< matcher
 		OutlierFilters outlierFilters; //!< outlier filters
@@ -710,6 +711,9 @@ struct PointMatcher
 
 		//! Return the latest data association between reading and reference point clouds.
 		const Matches& getMatches() const { return matches; }
+
+		//! Return the latest outlier weights for the reading point cloud.
+		const OutlierWeights& getOutlierWeights() const { return outlierWeights; }
 
 	protected:
 		unsigned prefilteredReadingPtsCount; //!< remaining number of points after prefiltering but before the iterative process
