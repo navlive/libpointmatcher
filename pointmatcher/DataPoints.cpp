@@ -1197,7 +1197,7 @@ void PointMatcher<T>::swapDataPoints(DataPoints& a, DataPoints& b)
 	swap(a.timeLabels, b.timeLabels);
 	a.indexGrid.swap(b.indexGrid);
 }
-
+ 
 template
 void PointMatcher<float>::swapDataPoints(DataPoints& a, DataPoints& b);
 template
