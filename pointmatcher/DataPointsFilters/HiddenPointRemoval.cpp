@@ -33,7 +33,7 @@ HiddenPointRemovalDataPointsFilter<T>::filter(const DataPoints& input)
 }
 
 template <typename T>
-void HiddenPointRemovalDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
+void HiddenPointRemovalDataPointsFilter<T>::inPlaceFilter(DataPoints& /*cloud*/)
 {
 }
 
