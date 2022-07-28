@@ -138,6 +138,12 @@ struct PointMatcher
 	#define ONE_MINUS_EPS (1. - std::numeric_limits<double>::epsilon())
 
 	// ---------------------------------
+	// compile-time constants
+	// ---------------------------------
+	static constexpr T kConversionFactorBytesToMegabytes{1024.0 * 1024.0};
+  	static constexpr T kConversionFactorBytesToGygabytes{1024.0 * 1024.0 * 1024.0};
+
+	// ---------------------------------
 	// exceptions
 	// ---------------------------------
 
@@ -156,6 +162,8 @@ struct PointMatcher
 
 	//! The scalar type
 	typedef T ScalarType;
+	//! A 64-bit integer
+	typedef typename std::int64_t Int64;
 	//! A vector over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	//! A vector of vector over ScalarType, not a matrix
@@ -171,7 +179,7 @@ struct PointMatcher
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	//! A dense signed 64-bits matrix
-	typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+	typedef typename Eigen::Matrix<Int64, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
 
@@ -357,6 +365,9 @@ struct PointMatcher
 		Index& getIndexGridCell(Index rowIndex, Index colIndex);
 		bool isOrganized() const;
 		void assertIndexGridConsistency() const;
+
+		// methods related to storage
+        Int64 computeMemoryUsage() const;
 
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features

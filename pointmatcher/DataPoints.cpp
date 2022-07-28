@@ -885,6 +885,29 @@ void PointMatcher<T>::DataPoints::assertIndexGridConsistency() const
 	assert(indexGrid.rows() * indexGrid.cols() == getNbPoints());
 }
 
+/// Return the number of bytes of memory used by this DataPoints structure.
+template<typename T>
+typename PointMatcher<T>::Int64 PointMatcher<T>::DataPoints::computeMemoryUsage() const
+{
+    Int64 totalMemoryUsed{ 0 };
+
+    // Labels.
+    totalMemoryUsed += sizeof(Labels) * 3;
+    totalMemoryUsed += sizeof(std::string) * featureLabels.size();
+    totalMemoryUsed += sizeof(std::string) * descriptorLabels.size();
+    totalMemoryUsed += sizeof(std::string) * timeLabels.size();
+
+    // Data.
+    totalMemoryUsed += sizeof(T) * features.rows() * features.cols();
+    totalMemoryUsed += sizeof(T) * descriptors.rows() * descriptors.cols();
+    totalMemoryUsed += sizeof(Int64) * times.rows() * times.cols();
+
+    // Index grid
+    totalMemoryUsed += sizeof(Index) * indexGrid.rows() * indexGrid.cols();
+
+    return totalMemoryUsed;
+}
+
 //! Assert if a matrix is not consistent with features
 template<typename T>
 void PointMatcher<T>::DataPoints::assertConsistency(const std::string& dataName,  const int dataRows, const int dataCols, const Labels& labels) const
