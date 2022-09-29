@@ -44,9 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //TODO: investigate if that causes more problems down the road
 #define EIGEN_NO_DEBUG
 
-#include "Eigen/StdVector"
-#include "Eigen/Core"
-#include "Eigen/Geometry"
+#include <Eigen/StdVector>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <Eigen/Eigenvalues>
 
 
 #include <boost/thread/mutex.hpp>
@@ -834,7 +835,65 @@ struct PointMatcher
 		DataPoints mapPointCloud; //!< point cloud of the map, always in global frame (frame of first point cloud)
 	};
 
-	// ---------------------------------
+    // Surface normal estimation based on PCA analyses the span of a group of points by computing their eigenvectors and eigenvalues.
+    // The eigenvector associated with the smallest eigenvalue of a group of points corresponds to the direction of least span
+    // of the data, and thus, it is interpreted as The Surface Normal of the points.
+    struct SurfaceNormalEstimatorPCA
+    {
+        //!< Typedefs
+        static constexpr Eigen::Index kPointDimension{ 3 };
+        typedef typename Eigen::Matrix<T, kPointDimension, kPointDimension> FixedSizeMatrix3;
+        typedef Eigen::SelfAdjointEigenSolver<FixedSizeMatrix3> EigenvalueSolver;
+
+        //!< Methods
+
+        //! Extrudes a normal from an ordered collection of eigenvectors of a point cluster.
+        //! Uses the first eigenvector in the collection to compute the normal, following the convention from libeigen::SelfAdjointEigenSolver
+        //! that eigenvectors and eigenvalues are stored in increasing order of eigenvalue magnitude.
+        //! @param eigenValues[in]      Eigenvalues of a point cluster.
+        //! @param eigenVectors[in]     Eigenvectors of a point cluster.
+        //! @return Vector              Normal vector.
+        static Vector extrudeNormalFromIncreasinglyOrderedEigenvectors(const Vector& eigenValues, const Matrix& eigenVectors) noexcept;
+
+        //! Extrudes a normal from an unordered collection of eigenvectors of a point cluster.
+        //! This method orders the eigenvectors according to the magnitude of the corresponding eigenvalues, and returns the eigenvector for the
+        //! smallest eigenvalue as the normal.
+        //! @param eigenValues[in]      Eigenvalues of a point cluster.
+        //! @param eigenVectors[in]     Eigenvectors of a point cluster.
+        //! @return Vector              Normal vector.
+        static Vector extrudeNormalFromUnorderedEigenvectors(const Vector& eigenValues, const Matrix& eigenVectors) noexcept;
+
+        //! Normal estimation based on PCA suffers from ambiguity in the extrusion of normals. A normal for a surface can be oriented in two ways (pointing towards the sensor, or against)
+        //! This method re-orients a normal so it points towards the sensor frame.
+        //! @param sensorPosition[in] 	Sensor position in the point cloud frame.
+        //! @param point[in]			Point to which the normal belongs
+        //! @param normalVector[out]    Normal vector to orient.
+        static void orientNormalVectorTowardsSensorFrame(const Vector& sensorPosition, const Vector& point, Vector& normalVector) noexcept;
+
+        //! This method computes local surface descriptors based on the papers
+        //! - "Contour detection in unstructured 3D point clouds" by Hackel et al (2016),
+        //! - “Fast semantic segmentation of 3d point clouds with strongly varying density” by Hackel et al (2016),
+        //! This function assumes that the eigenvalues are ordered in an increasing-manner.
+        //! @param eigenValues[in]	Eigenvalues of the local surface, will be used to compute descriptors.
+        //! @param linearity[out]    Linearity surface descriptor.
+        //! @param planarity[out]    Planarity surface descriptor.
+        //! @param curvature[out]    Curvature surface descriptor.
+        static void computeLocalSurfaceDescriptors(const Vector& eigenValues, T& linearity, T& planarity, T& curvature) noexcept;
+
+        //! Computes a normal applying PCA to a group of points.
+        //! @param selectedPoints[in]   Selected points, stacked in the columns of a matrix.
+        //! @param normal[out]          Normal vector of the points.
+        //! @param linearity[out]       Linearity surface descriptor.
+        //! @param planarity[out]       Planarity surface descriptor.
+        //! @param curvature[out]       Curvature surface descriptor.
+        //! @return bool                Whether the normal could be computed successfully.
+        bool computeNormalVector(const Matrix& points, Vector& normal, T& linearity, T& planarity, T& curvature) noexcept;
+
+        //!< Attributes
+        Eigen::Index minimumNumberOfPointsToComputeNormal{ 10 };
+    };
+
+    // ---------------------------------
 	// Instance-related functions
 	// ---------------------------------
 

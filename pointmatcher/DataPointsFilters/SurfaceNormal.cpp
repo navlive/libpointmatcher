@@ -61,6 +61,7 @@ SurfaceNormalDataPointsFilter<T>::SurfaceNormalDataPointsFilter(const Parameters
 	keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
 	keepMatchedIds(Parametrizable::get<bool>("keepMatchedIds")),
 	keepMeanDist(Parametrizable::get<bool>("keepMeanDist")),
+	keepSurfaceDescriptors(Parametrizable::get<bool>("keepSurfaceDescriptors")),
 	sortEigen(Parametrizable::get<bool>("sortEigen")),
 	smoothNormals(Parametrizable::get<bool>("smoothNormals"))
 {
@@ -109,6 +110,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 	const int dimEigVectors((featDim-1)*(featDim-1));
 	//const int dimMatchedIds(knn);
 	const int dimMeanDist(1);
+	const int dimLocalSurfaceDescriptors(1);
 
 	boost::optional<View> normals;
 	boost::optional<View> densities;
@@ -117,6 +119,9 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 	boost::optional<View> matchedValues;
 	boost::optional<View> matchIds;
 	boost::optional<View> meanDists;
+	boost::optional<View> linearity;
+	boost::optional<View> planarity;
+	boost::optional<View> curvature;
 
 	Labels cloudLabels;
 	if (keepNormals)
@@ -131,6 +136,12 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		cloudLabels.push_back(Label("matchedIds", knn));
 	if (keepMeanDist)
 		cloudLabels.push_back(Label("meanDists", dimMeanDist));
+	if (keepSurfaceDescriptors)
+	{
+		cloudLabels.push_back(Label("linearity", dimLocalSurfaceDescriptors));
+		cloudLabels.push_back(Label("planarity", dimLocalSurfaceDescriptors));
+		cloudLabels.push_back(Label("curvature", dimLocalSurfaceDescriptors));
+	}
 
 	// Reserve memory
 	cloud.allocateDescriptors(cloudLabels);
@@ -147,6 +158,12 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		matchIds = cloud.getDescriptorViewByName("matchedIds");
 	if (keepMeanDist)
 		meanDists = cloud.getDescriptorViewByName("meanDists");
+	if (keepSurfaceDescriptors)
+	{
+		linearity = cloud.getDescriptorViewByName("linearity");
+		planarity = cloud.getDescriptorViewByName("planarity");
+		curvature = cloud.getDescriptorViewByName("curvature");
+	}
 
 	using namespace PointMatcherSupport;
 	// Build kd-tree
@@ -184,7 +201,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		const Vector mean = d.rowwise().sum() / T(realKnn);
 		const Matrix NN = d.colwise() - mean;
 
-		const Matrix C(NN * NN.transpose());
+		const Matrix C((NN * NN.transpose()) / T(realKnn));
 		Vector eigenVa = Vector::Zero(featDim-1, 1);
 		Matrix eigenVe = Matrix::Zero(featDim-1, featDim-1);
 		// Ensure that the matrix is suited for eigenvalues calculation
@@ -220,9 +237,9 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		if(keepNormals)
 		{
 			if(sortEigen)
-				normals->col(i) = eigenVe.col(0);
+				normals->col(i) = SurfaceNormalEstimatorPCA::extrudeNormalFromIncreasinglyOrderedEigenvectors(eigenVa, eigenVe);
 			else
-				normals->col(i) = computeNormal<T>(eigenVa, eigenVe);
+				normals->col(i) = SurfaceNormalEstimatorPCA::extrudeNormalFromUnorderedEigenvectors(eigenVa, eigenVe);
 			
 			// clamp normals to [-1,1] to handle approximation errors
 			normals->col(i) = normals->col(i).cwiseMax(-1.0).cwiseMin(1.0);
@@ -249,6 +266,29 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 			}
 		}
 
+		if(keepSurfaceDescriptors)
+		{
+			if(isDegenerate)
+			{
+				(*linearity)(0, i) = std::numeric_limits<std::size_t>::min();
+				(*planarity)(0, i) = std::numeric_limits<std::size_t>::min();
+				(*curvature)(0, i) = std::numeric_limits<std::size_t>::min();
+			}
+			else
+			{
+				if(sortEigen)
+				{
+					SurfaceNormalEstimatorPCA::computeLocalSurfaceDescriptors(eigenVa, (*linearity)(0, i), (*planarity)(0, i), (*curvature)(0, i));
+				}
+				else
+				{
+					Vector eigenVaSort{eigenVa};
+					std::sort(eigenVaSort.data(), eigenVaSort.data() + eigenVaSort.size());
+					SurfaceNormalEstimatorPCA::computeLocalSurfaceDescriptors(eigenVaSort, (*linearity)(0, i), (*planarity)(0, i), (*curvature)(0, i));
+				}
+				
+			}
+		}
 	}
 
 	if(keepMatchedIds)

@@ -1,7 +1,7 @@
 readingDataPointsFilters:
   - SurfaceNormalDataPointsFilter:
       knn: 12
-      epsilon: 1.33
+      epsilon: 0.3
       keepNormals: 1
       keepDensities: 1
 

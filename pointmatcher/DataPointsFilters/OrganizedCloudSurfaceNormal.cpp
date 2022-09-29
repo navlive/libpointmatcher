@@ -2,8 +2,8 @@
 // vim: ts=4:sw=4:noexpandtab
 /*
 
-Copyright (c) 2010--2018,
-François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+Copyright (c) 2021,
+Yoshua Nava, ANYbotics AG, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
@@ -80,6 +80,10 @@ void OrganizedCloudSurfaceNormalDataPointsFilter<T>::inPlaceFilter(DataPoints& c
     Labels cloudLabels;
     cloudLabels.emplace_back(Label("normals", dimNormals));
     cloudLabels.emplace_back(Label("densities", dimDensities));
+    // Local surface descriptors described in 'T. Hackel, J. D. Wegner, and K. Schindler, “Fast semantic segmentation of 3d point clouds with strongly varying density”'
+    cloudLabels.push_back(Label("linearity", 1));
+    cloudLabels.push_back(Label("planarity", 1));
+    cloudLabels.push_back(Label("curvature", 1));
 
     // Allocate descriptors.
     cloud.allocateDescriptors(cloudLabels);
@@ -87,10 +91,16 @@ void OrganizedCloudSurfaceNormalDataPointsFilter<T>::inPlaceFilter(DataPoints& c
     // Get views of descriptors.
     boost::optional<View> normals = cloud.getDescriptorViewByName("normals");
     boost::optional<View> densities = cloud.getDescriptorViewByName("densities");
+    boost::optional<View> linearity = cloud.getDescriptorViewByName("linearity");
+    boost::optional<View> planarity = cloud.getDescriptorViewByName("planarity");
+    boost::optional<View> curvature = cloud.getDescriptorViewByName("curvature");
 
     // Set descriptors to zero.
     normals->setZero();
     densities->setZero();
+    linearity->setZero();
+    planarity->setZero();
+    curvature->setZero();
 
     // Compute neighbors of each point from index grid.
     const Index maxIndexOffset{ knn / 2 };
@@ -106,8 +116,19 @@ void OrganizedCloudSurfaceNormalDataPointsFilter<T>::inPlaceFilter(DataPoints& c
             }
 
             const GridIndex centerGridIndex{ row, col };
-            processPatchAroundPoint(
-                cloud, nbRows, nbCols, featDim, centerGridIndex, maxIndexOffset, eigenSolver, selectedFeatures, *normals, *densities);
+            processPatchAroundPoint(cloud,
+                                    nbRows,
+                                    nbCols,
+                                    featDim,
+                                    centerGridIndex,
+                                    maxIndexOffset,
+                                    eigenSolver,
+                                    selectedFeatures,
+                                    *normals,
+                                    *densities,
+                                    *linearity,
+                                    *planarity,
+                                    *curvature);
         }
     }
 }
@@ -120,12 +141,10 @@ typename DerivedA::Scalar squaredEuclideanDistance(const Eigen::MatrixBase<Deriv
 
 template<typename T>
 template<typename Derived>
-bool OrganizedCloudSurfaceNormalDataPointsFilter<T>::processPatchAroundPoint(const DataPoints& cloud, const Index& nbRows,
-                                                                             const Index& nbCols, const Index& featDim,
-                                                                             const GridIndex& centerGridIndex, const Index& maxIndexOffset,
-                                                                             Eigen::SelfAdjointEigenSolver<FixedSizeMatrix3>& eigenSolver,
-                                                                             Eigen::MatrixBase<Derived>& selectedFeatures, View& normals,
-                                                                             View& densities) const
+bool OrganizedCloudSurfaceNormalDataPointsFilter<T>::processPatchAroundPoint(
+    const DataPoints& cloud, const Index& nbRows, const Index& nbCols, const Index& featDim, const GridIndex& centerGridIndex,
+    const Index& maxIndexOffset, Eigen::SelfAdjointEigenSolver<FixedSizeMatrix3>& eigenSolver, Eigen::MatrixBase<Derived>& selectedFeatures,
+    View& normals, View& densities, View& linearity, View& planarity, View& curvature) const
 {
     using namespace PointMatcherSupport;
     const Index centerLinearIndex{ cloud.computeLinearIndexFromGridIndex(centerGridIndex.row, centerGridIndex.col) };
@@ -195,8 +214,11 @@ bool OrganizedCloudSurfaceNormalDataPointsFilter<T>::processPatchAroundPoint(con
     }
 
     // Compute normal and clamp it to [-1,1] to handle approximation errors
-    normals.col(centerLinearIndex) = computeNormalFromOrderedEigenvectors<T>(eigenVa, eigenVe).cwiseMax(-1.0).cwiseMin(1.0);
+    normals.col(centerLinearIndex) =
+        SurfaceNormalEstimatorPCA::extrudeNormalFromIncreasinglyOrderedEigenvectors(eigenVa, eigenVe).cwiseMax(-1.0).cwiseMin(1.0);
     densities.col(centerLinearIndex).setConstant(computeDensity<T>(NN));
+    SurfaceNormalEstimatorPCA::computeLocalSurfaceDescriptors(
+        eigenVa, linearity(0, centerLinearIndex), planarity(0, centerLinearIndex), curvature(0, centerLinearIndex));
 
     return true;
 }

@@ -127,6 +127,7 @@ T computeDensity(const Eigen::MatrixBase<Derived>& NN)
 	return (volume > 0) ? (nbPoints / volume) : 0;
 }
 
+// TODO(ynava) Replace this method in Ellipsoids, Gestalt and SamplingSurfaceNormal filters with the new versions from Pointmatcher::SurfaceNormalEstimatorPCA.
 template<typename T>
 typename PointMatcher<T>::Vector
 computeNormal(const typename PointMatcher<T>::Vector& eigenVa, const typename PointMatcher<T>::Matrix& eigenVe)
@@ -145,23 +146,6 @@ computeNormal(const typename PointMatcher<T>::Vector& eigenVa, const typename Po
 	}
 
   return eigenVe.col(smallestId);
-}
-
-/**
- * @brief Computes the normal vector of a point patch based on a collection of ordered eigenvectors.
- * @remark remark Uses the first eigenvector in the collection to compute the normal, following the
- * convention from libeigen::SelfAdjointEigenSolver that eigenvectors and eigenvalues are stored in 
- * increasing order of eigenvalue magnitude.
- * 
- * @tparam T 		Numeric type used to instantiate PointMatcher.
- * @tparam DerivedA Type of eigenvalues vector.
- * @tparam DerivedB Type of eigenvectors matrix.
- */
-template<typename T, typename DerivedA, typename DerivedB>
-typename PointMatcher<T>::Vector
-computeNormalFromOrderedEigenvectors(const Eigen::MatrixBase<DerivedA>& /*eigenVa*/, const Eigen::MatrixBase<DerivedB>& eigenVe)
-{
-  return eigenVe.col(0);
 }
 
 template<typename T>

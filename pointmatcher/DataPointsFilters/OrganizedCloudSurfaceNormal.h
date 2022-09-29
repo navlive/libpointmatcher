@@ -2,8 +2,8 @@
 // vim: ts=4:sw=4:noexpandtab
 /*
 
-Copyright (c) 2010--2018,
-François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+Copyright (c) 2021,
+Yoshua Nava, ANYbotics AG, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
@@ -64,6 +64,7 @@ struct OrganizedCloudSurfaceNormalDataPointsFilter : public PointMatcher<T>::Dat
     typedef typename PointMatcher<T>::DataPoints::Label Label;
     typedef typename PointMatcher<T>::DataPoints::Labels Labels;
     typedef typename Eigen::Matrix<T, 3, 3> FixedSizeMatrix3;
+    typedef typename PointMatcher<T>::SurfaceNormalEstimatorPCA SurfaceNormalEstimatorPCA;
 
     inline static const std::string description()
     {
@@ -95,9 +96,9 @@ struct OrganizedCloudSurfaceNormalDataPointsFilter : public PointMatcher<T>::Dat
     virtual void inPlaceFilter(DataPoints& cloud);
 
     template<typename Derived>
-    
+
     bool processPatchAroundPoint(const DataPoints& cloud, const Index& nbRows, const Index& nbCols, const Index& featDim,
                                  const GridIndex& centerGridIndex, const Index& maxIndexOffset,
                                  Eigen::SelfAdjointEigenSolver<FixedSizeMatrix3>& eigenSolver, Eigen::MatrixBase<Derived>& selectedFeatures,
-                                 View& normals, View& densities) const;
+                                 View& normals, View& densities, View& linearity, View& planarity, View& curvature) const;
 };

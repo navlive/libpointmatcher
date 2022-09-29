@@ -26,6 +26,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/LoggerImpl.cpp
 	pointmatcher/MatchersImpl.cpp
 	pointmatcher/OutlierFiltersImpl.cpp
+	pointmatcher/SurfaceNormalEstimatorPCA.cpp
 	pointmatcher/TransformationsImpl.cpp
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp

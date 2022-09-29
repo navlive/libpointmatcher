@@ -53,6 +53,7 @@ struct SurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	typedef typename PointMatcher<T>::Matrix Matrix;	
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
+	typedef typename PointMatcher<T>::SurfaceNormalEstimatorPCA SurfaceNormalEstimatorPCA;
 
 	inline static const std::string description()
 	{
@@ -74,6 +75,7 @@ struct SurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 			{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"},
 			{"keepMatchedIds" , "whether the identifiers of matches points should be added as descriptors to the resulting cloud", "0"},
 			{"keepMeanDist" , "whether the distance to the nearest neighbor mean should be added as descriptors to the resulting cloud", "0"},
+			{"keepSurfaceDescriptors" , "whether local surface descriptors (linearity, planarity and curvature from Hackel et al, 2016) should be added to the resulting cloud", "1"},
 			{"sortEigen" , "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0"},
 			{"smoothNormals", "whether the normal vector should be average with the nearest neighbors", "0"}
 		};
@@ -88,6 +90,7 @@ struct SurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	const bool keepEigenVectors;
 	const bool keepMatchedIds;
 	const bool keepMeanDist;
+	const bool keepSurfaceDescriptors;
 	const bool sortEigen;
 	const bool smoothNormals;
 
