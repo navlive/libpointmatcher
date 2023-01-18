@@ -187,43 +187,26 @@ endif(USE_OPEN_CL)
 
 
 #--------------------
-# DEPENDENCY: yaml-cpp (local or system, optional)
+# DEPENDENCY: yaml-cpp (system, optional)
 #--------------------
 option(USE_SYSTEM_YAML_CPP "Use system version of yaml-cpp rather than one packaged with libpointmatcher" FALSE)
 
-if(USE_SYSTEM_YAML_CPP)
-    message(STATUS "Looking for yaml-cpp on system")
-    find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
-            /usr/local/include
-    )
-    find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
-            /usr/local/lib
-    )
-    if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-            include_directories(${yaml-cpp_INCLUDE_DIRS})
-            add_definitions(-DSYSTEM_YAML_CPP)
-            set(yamlcpp_FOUND)
-            set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp_LIBRARIES} )
-            message("-- yaml-cpp found, text-based configuration enabled")
-    else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-            message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-    endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-else(USE_SYSTEM_YAML_CPP)
-        include_directories(contrib/yaml-cpp-pm/include)
-
-#note: this is not working....
-        #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
-        #include_directories(${yaml-cpp-pm_INCLUDE})
-
-        get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
-        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
-        set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
-        set(yamlcpp_FOUND)
-
-        get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
-        message("-- using built-in yaml-cpp, version ${yaml-cpp-pm_VERSION}")
-        message("   -- text-based configuration enabled")
-endif(USE_SYSTEM_YAML_CPP)
+message(STATUS "Looking for yaml-cpp on system")
+find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
+	/usr/local/include
+)
+find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
+	/usr/local/lib
+)
+if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	include_directories(${yaml-cpp_INCLUDE_DIRS})
+	add_definitions(-DSYSTEM_YAML_CPP)
+	set(yamlcpp_FOUND)
+	set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp_LIBRARIES} )
+	message("-- yaml-cpp found, text-based configuration enabled")
+else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
+endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
 
 #--------------------
@@ -414,12 +397,7 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 
 #FIXME: this will only be applied to installed files. Confirm that we want that.
 # gather all the includes but remove ones in the source tree
-# because we added an include for the local yaml-cpp-pm we should also remove it
-list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
-
-if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
-  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
-endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR})
 
 # Change the library location for an install location
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)

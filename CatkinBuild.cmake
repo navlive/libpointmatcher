@@ -26,7 +26,7 @@ catkin_package(
     ${CMAKE_SOURCE_DIR}
     ${EIGEN3_INCLUDE_DIR}
   LIBRARIES
-    yaml_cpp_pm
+    yaml-cpp
     pointmatcher
   CATKIN_DEPENDS
     ${CATKIN_PACKAGE_DEPENDENCIES}
@@ -37,29 +37,12 @@ catkin_package(
 ########################
 ## Library definition ##
 ########################
-# Yaml-cpp
-file(GLOB YAML_PRIVATE_HEADERS "contrib/yaml-cpp-pm/src/[a-zA-Z]*.h")
-file(GLOB YAML_SOURCES "contrib/yaml-cpp-pm/src/[a-zA-Z]*.cpp")
-add_library(yaml_cpp_pm
-  ${YAML_SOURCES}
-  ${YAML_PRIVATE_HEADERS}
-)
-target_include_directories(yaml_cpp_pm PUBLIC
-  contrib/yaml-cpp-pm/include
-)
-target_include_directories(yaml_cpp_pm PRIVATE
-  contrib/yaml-cpp-pm/src
-)
-target_compile_options(yaml_cpp_pm PRIVATE -w)
-
 # Libpointmatcher
 add_library(pointmatcher
   ${POINTMATCHER_SRC}
   ${POINTMATCHER_HEADERS}
 )
-add_dependencies(pointmatcher
-  yaml_cpp_pm
-)
+
 target_include_directories(pointmatcher PUBLIC
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/pointmatcher
@@ -70,7 +53,6 @@ target_include_directories(pointmatcher SYSTEM PRIVATE
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${yaml_cpp_pm_INCLUDE_DIRS}
 )
 target_link_libraries(pointmatcher
   ${catkin_LIBRARIES}
@@ -81,7 +63,7 @@ target_link_libraries(pointmatcher
   Boost::thread
   Boost::timer
   Boost::system
-  yaml_cpp_pm
+  yaml-cpp
 )
 
 #############
@@ -90,7 +72,6 @@ target_link_libraries(pointmatcher
 install(
   TARGETS
     pointmatcher
-    yaml_cpp_pm
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -122,7 +103,6 @@ if(CATKIN_ENABLE_TESTING)
   )
   add_dependencies(test_pointmatcher
     pointmatcher
-    yaml_cpp_pm
   )
   target_include_directories(test_pointmatcher PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -137,7 +117,7 @@ if(CATKIN_ENABLE_TESTING)
   )
   target_link_libraries(test_pointmatcher
     pointmatcher
-    yaml_cpp_pm
+    yaml-cpp
     ${catkin_LIBRARIES}
   )
 
@@ -152,8 +132,6 @@ if(CATKIN_ENABLE_TESTING)
       TEST_BUILD_TARGETS
         test_pointmatcher
       SOURCE_EXCLUDE_PATTERN
-        ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-pm/include/yaml-cpp-pm/** # Cold copy of yaml-cpp headers.
-        ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-pm/src/** # Cold copy of yaml-cpp sources.
         ${PROJECT_SOURCE_DIR}/utest/*
         ${PROJECT_SOURCE_DIR}/utest/ui/*
     )

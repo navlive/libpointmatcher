@@ -81,7 +81,6 @@ LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
                         /usr/local/lib/libboost_chrono-mt.dylib \
                         /Users/francoispomerleau/Research/Code/libpointmatcher/build/libpointmatcher.a \
                         /Users/francoispomerleau/Research/Code/libnabo/build/libnabo.a \
-                        /Users/francoispomerleau/Research/Code/libpointmatcher/build/contrib/yaml-cpp-pm/libyaml-cpp-pm.a
 ```
 
 A working example of how to link to an external project can be found in [./examples/demo_Qt](../examples/demo_Qt).

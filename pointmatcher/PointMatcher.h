@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DeprecationWarnings.h"
 #include "Parametrizable.h"
 #include "Registrar.h"
+#include <yaml-cpp/yaml.h>
 
 /*!
 	\file PointMatcher.h
@@ -736,18 +737,18 @@ struct PointMatcher
 
 		void cleanup();
 
-        virtual void loadAdditionalYAMLContent(PointMatcherSupport::YAML::Node& doc);
+        virtual void loadAdditionalYAMLContent(YAML::Node& doc);
 
 		//! Instantiate modules if their names are in the YAML file
 		template<typename R>
-        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, std::vector<std::shared_ptr<typename R::TargetType> >& modules);
+        const std::string& createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::vector<std::shared_ptr<typename R::TargetType> >& modules);
 
 		//! Instantiate a module if its name is in the YAML file
 		template<typename R>
-        const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
+        const std::string& createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
 
 		//! Get the value of a field in a node
-        std::string nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc);
+        std::string nodeVal(const std::string& regName, const YAML::Node& doc);
 	};
 
 	//! ICP algorithm
