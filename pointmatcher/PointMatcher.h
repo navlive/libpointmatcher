@@ -499,6 +499,7 @@ struct PointMatcher
 	struct DataPointsFilters: public std::vector<std::shared_ptr<DataPointsFilter> >
 	{
 		DataPointsFilters();
+        DataPointsFilters(const YAML::Node& yamlNode);
 		DataPointsFilters(std::istream& in);
 		void init();
 		void apply(DataPoints& cloud);

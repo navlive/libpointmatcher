@@ -84,6 +84,21 @@ PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
 	}
 }
 
+//! Construct a chain from a YAML Node
+template<typename T>
+PointMatcher<T>::DataPointsFilters::DataPointsFilters(const YAML::Node& yamlNode)
+{
+    // Fix for issue #6: compilation on gcc 4.4.4
+    //PointMatcher<T> pm;
+    const PointMatcher & pm = PointMatcher::get();
+
+    for(YAML::const_iterator moduleIt = yamlNode.begin(); moduleIt != yamlNode.end(); ++moduleIt)
+    {
+        const YAML::Node& module(*moduleIt);
+        this->push_back(pm.REG(DataPointsFilter).createFromYAML(module));
+    }
+}
+
 //! Init the chain
 template<typename T>
 void PointMatcher<T>::DataPointsFilters::init()
