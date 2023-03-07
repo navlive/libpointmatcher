@@ -162,10 +162,14 @@ struct PointMatcher
 	// eigen and nabo-based types
 	// ---------------------------------
 
+	//! The dimension of the point clouds that libpointmatcher will process
+	static constexpr Eigen::Index kPointDimension{ 3 };
 	//! The scalar type
 	typedef T ScalarType;
 	//! A 64-bit integer
 	typedef typename std::int64_t Int64;
+	//! A vector over ScalarType
+	typedef typename Eigen::Matrix<T, kPointDimension, 1> StaticVector;
 	//! A vector over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	//! A vector of vector over ScalarType, not a matrix
@@ -184,6 +188,8 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<Int64, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
+	//! An affine transform over ScalarType
+	typedef typename Eigen::Transform<T, kPointDimension, Eigen::Affine> AffineTransform;
 
 
 	//! A matrix holding the parameters a transformation.
@@ -843,7 +849,6 @@ struct PointMatcher
     struct SurfaceNormalEstimatorPCA
     {
         //!< Typedefs
-        static constexpr Eigen::Index kPointDimension{ 3 };
         typedef typename Eigen::Matrix<T, kPointDimension, kPointDimension> FixedSizeMatrix3;
         typedef Eigen::SelfAdjointEigenSolver<FixedSizeMatrix3> EigenvalueSolver;
 
