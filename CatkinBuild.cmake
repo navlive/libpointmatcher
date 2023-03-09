@@ -100,6 +100,7 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/Outliers.cpp
       utest/ui/Transformations.cpp
       utest/ui/octree/Octree.cpp
+      utest/ui/icp/GeneralTests.cpp
   )
   add_dependencies(test_pointmatcher
     pointmatcher
