@@ -476,6 +476,20 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 	return output;
 }
 
+//! Removes all points from the current point cloud, leaving only labels for features.
+template<typename T>
+void PointMatcher<T>::DataPoints::clear()
+{
+    const Index zeroPointCount{ 0 };
+
+    this->features.resize(zeroPointCount, zeroPointCount);
+    this->descriptorLabels.clear();
+    this->descriptors.resize(zeroPointCount, zeroPointCount);
+    this->timeLabels.clear();
+    this->times.resize(zeroPointCount, zeroPointCount);
+    this->deallocateIndexGrid();
+}
+
 //! Set column thisCol equal to column thatCol of that, copy features and descriptors if any. Assumes sizes are similar
 //! If this function is called on an organized point cloud, it will make the point cloud order inconsistent.
 template<typename T>

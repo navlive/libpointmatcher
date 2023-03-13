@@ -17,7 +17,6 @@ TEST(PointCloudTest, CopyConstructor2D)
 	EXPECT_TRUE(ref2DCopy == ref2D);
 }
 
-
 TEST(PointCloudTest, FeatureConstructor2D)
 {
 	const DP ref2DCopy(ref2D.features, ref2D.featureLabels);
@@ -26,6 +25,16 @@ TEST(PointCloudTest, FeatureConstructor2D)
 	EXPECT_TRUE(ref2DCopy == ref2D);
 	EXPECT_TRUE(ref2DCopy.descriptors.rows() == 0);
 	EXPECT_TRUE(ref2DCopy.descriptors.cols() == 0);
+}
+
+TEST(PointCloudTest, CopyConstructor3D)
+{
+	const DP ref3DCopy(ref3D);
+	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
+	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy.descriptors == ref3D.descriptors);
+	EXPECT_TRUE(ref3DCopy.descriptorLabels == ref3D.descriptorLabels);
+	EXPECT_TRUE(ref3DCopy == ref3D);
 }
 
 TEST(PointCloudTest, FeatureConstructor3D)
@@ -111,6 +120,21 @@ TEST(PointCloudTest, ConstructorWithData)
 
 
 
+}
+
+TEST(PointCloudTest, Clear)
+{
+	DP clearedPointCloud(ref3D);
+	clearedPointCloud.clear();
+	EXPECT_TRUE(clearedPointCloud.featureLabels.size() == 4);
+	EXPECT_TRUE(clearedPointCloud.descriptorLabels.size() == 0);
+	EXPECT_TRUE(clearedPointCloud.timeLabels.size() == 0);
+	EXPECT_TRUE(clearedPointCloud.features.rows() == 0);
+	EXPECT_TRUE(clearedPointCloud.features.cols() == 0);
+	EXPECT_TRUE(clearedPointCloud.descriptors.rows() == 0);
+	EXPECT_TRUE(clearedPointCloud.descriptors.cols() == 0);
+	EXPECT_TRUE(clearedPointCloud.times.rows() == 0);
+	EXPECT_TRUE(clearedPointCloud.times.cols() == 0);
 }
 
 TEST(PointCloudTest, ConcatenateFeatures2D)

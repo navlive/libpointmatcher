@@ -314,6 +314,7 @@ struct PointMatcher
 		void conservativeResize(Index pointCount);
 		DataPoints createSimilarEmpty() const;
 		DataPoints createSimilarEmpty(Index pointCount) const;
+		void clear();
 		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
 		void swapCols(Index iCol,Index jCol);
 
