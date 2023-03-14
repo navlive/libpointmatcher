@@ -214,7 +214,7 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	const LineArray FRMS = trunkSortedDist * ids.inverse() * deno.inverse().square() ;
 	int minIndex(0);// = FRMS.minCoeff();
 	FRMS.minCoeff(&minIndex);
-	const T optRatio = (float)(minIndex + minEl)/ (float)points_nbr;
+	const T optRatio = (T)(minIndex + minEl)/ (T)points_nbr;
 	
 	return optRatio;
 }

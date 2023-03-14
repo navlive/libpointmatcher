@@ -48,7 +48,7 @@ const float pointSepX = divSize(0) / (pointsPerDiv(0) + 1); // add 1 because we 
 const float pointSepY = divSize(1) / (pointsPerDiv(1) + 1);
 
 // Input test cloud: Equally spaced points along grid
-MatrixXf testCloudP(3,numPoints);
+PM::Matrix testCloudP(3,numPoints);
 for (int i = 0; i < (numDivs(0) * pointsPerDiv(0)) ; i++ )
 {
 	for (int j = 0; j < (numDivs(1) * pointsPerDiv(1) ); j++ )
@@ -62,7 +62,7 @@ for (int i = 0; i < (numDivs(0) * pointsPerDiv(0)) ; i++ )
 }
 
 // Validation cloud: centers of each voxel
-MatrixXf valCloudP(3,numDivs(0) * numDivs(1));
+PM::Matrix valCloudP(3,numDivs(0) * numDivs(1));
 for (int i = 0; i < numDivs(0); i++)
 {
 	for (int j = 0; j < numDivs(1); j++)
@@ -111,7 +111,7 @@ const float pointSepY = divSize(1) / (pointsPerDiv(1) + 1);
 const float pointSepZ = divSize(2) / (pointsPerDiv(1) + 1);
 
 // Input test cloud: Equally spaced points along grid
-MatrixXf testCloudP(4,numPoints);
+PM::Matrix testCloudP(4,numPoints);
 for (int i = 0; i < (numDivs(0) * pointsPerDiv(0)) ; i++ )
 {
 	for (int j = 0; j < (numDivs(1) * pointsPerDiv(1) ); j++ )
@@ -129,7 +129,7 @@ for (int i = 0; i < (numDivs(0) * pointsPerDiv(0)) ; i++ )
 }
 
 // Validation cloud: centers of each voxel
-MatrixXf valCloudP(4,numDivs(0) * numDivs(1) * numDivs(2));
+PM::Matrix valCloudP(4,numDivs(0) * numDivs(1) * numDivs(2));
 for (int i = 0; i < numDivs(0); i++)
 {
 	for (int j = 0; j < numDivs(1); j++)
@@ -192,8 +192,8 @@ const float pointSepY = divSize(1) / (pointsPerDiv(1) + 1);
 
 // Input test cloud: Equally spaced points along grid
 // Descriptors: half pointing up, half pointing down
-MatrixXf testCloudP(3, numPoints);
-MatrixXf testCloudD(3, numPoints);
+PM::Matrix testCloudP(3, numPoints);
+PM::Matrix testCloudD(3, numPoints);
 testCloudD.setZero();
 for (int i = 0; i < (numDivs(0) * pointsPerDiv(0)) ; i++ )
 {

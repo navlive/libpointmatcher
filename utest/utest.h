@@ -72,8 +72,8 @@ public:
 		const BOOST_AUTO(validTrans, validT3d.block(0, dim-1, dim-1, 1).norm());
 		const BOOST_AUTO(testTrans, testT.block(0, dim-1, dim-1, 1).norm());
 	
-		const BOOST_AUTO(testRotation, Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(testT.topLeftCorner(3,3))));
-		const BOOST_AUTO(validRotation, Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(validT3d.topLeftCorner(3,3))));
+		const BOOST_AUTO(testRotation, PM::Quaternion(Eigen::Matrix<NumericType,3,3>(testT.topLeftCorner(3,3))));
+		const BOOST_AUTO(validRotation, PM::Quaternion(Eigen::Matrix<NumericType,3,3>(validT3d.topLeftCorner(3,3))));
 		
 		const BOOST_AUTO(angleDist, validRotation.angularDistance(testRotation));
 		

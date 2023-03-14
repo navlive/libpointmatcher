@@ -29,7 +29,7 @@ TEST(IOTest, loadYaml)
 
 TEST(IOTest, loadCSV)
 {
-  typedef PointMatcherIO<float> IO;
+  typedef PointMatcherIO<NumericType> IO;
 	std::istringstream is;
   std::ostringstream os;
   DP pts;
@@ -180,7 +180,7 @@ TEST(IOTest, loadCSV)
 
 TEST(IOTest, loadPLY)
 {
-	typedef PointMatcherIO<float> IO;
+	typedef PointMatcherIO<NumericType> IO;
 	std::istringstream is;
 	
 	is.str(
@@ -214,6 +214,7 @@ TEST(IOTest, loadPLY)
 	EXPECT_THROW(IO::loadPLY(is), runtime_error);
 
 	is.clear();
+	// TODO(ynava) Check whether we can save data as doubles in a PLY. If yes, adapt this test.
 	is.str(
 	"ply\n"
 	"format ascii 1.0\n"
@@ -254,7 +255,7 @@ TEST(IOTest, loadPLY)
 
 TEST(IOTest, loadPCD)
 {
-	typedef PointMatcherIO<float> IO;
+	typedef PointMatcherIO<NumericType> IO;
 	std::istringstream is;
 
 	// Empty file

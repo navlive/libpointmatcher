@@ -113,7 +113,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
     const T twoPi{ 2. * M_PI };
     const Eigen::Array<T, 1, Eigen::Dynamic> polarAngleOfNormals{ normals.row(2).array().acos() };
     const Eigen::Array<T, 1, Eigen::Dynamic> azimuthAngleOfNormals{ normals.row(1).array().binaryExpr(
-        normals.row(0).array(), [&](float y, float x) { return std::fmod(std::atan2(y, x) + twoPi, twoPi); }) };
+        normals.row(0).array(), [&](T y, T x) { return std::fmod(std::atan2(y, x) + twoPi, twoPi); }) };
 
 	///(1) put all points of the data into buckets based on their normal direction
 	for (auto pointIndex : pointIndices)

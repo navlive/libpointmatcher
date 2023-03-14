@@ -186,7 +186,7 @@ public:
     }
 
     void assertOnOctreeNodeContent(Octree& octree, const size_t depth, const bool isRoot, const bool isLeaf, const bool isEmpty,
-                                   const float radius, const Point& center, const OctreeDataContainer& points)
+                                   const NumericType radius, const Point& center, const OctreeDataContainer& points)
     {
         ASSERT_EQ(octree.getDepth(), depth);
         ASSERT_EQ(octree.isRoot(), isRoot);
@@ -220,7 +220,7 @@ TEST_F(OctreeTest, OnePointOctreeArbitraryCenter) // NOLINT
         const bool isRoot{ true };
         const bool isLeaf{ true };
         const bool isEmpty{ false };
-        const float radius{ 0 };
+        const NumericType radius{ 0 };
         const Point center{ Point::Zero() };
         const OctreeDataContainer points{ 0 };
 
@@ -241,7 +241,7 @@ TEST_F(OctreeTest, OnePointOctreeArbitraryCenter) // NOLINT
         const bool isRoot{ true };
         const bool isLeaf{ true };
         const bool isEmpty{ false };
-        const float radius{ 0 };
+        const NumericType radius{ 0 };
         const Point center{ Point{ 1, 1, -1 } };
         const OctreeDataContainer points{ 0 };
 
@@ -267,7 +267,7 @@ TEST_F(OctreeTest, OnePointOctreeOriginCenter) // NOLINT
         const bool isRoot{ true };
         const bool isLeaf{ true };
         const bool isEmpty{ false };
-        const float radius{ 0 };
+        const NumericType radius{ 0 };
         const Point center{ Point::Zero() };
         const OctreeDataContainer points{ 0 };
 
@@ -288,7 +288,7 @@ TEST_F(OctreeTest, OnePointOctreeOriginCenter) // NOLINT
         const bool isRoot{ true };
         const bool isLeaf{ true };
         const bool isEmpty{ false };
-        const float radius{ 0 };
+        const NumericType radius{ 0 };
         const Point center{ Point{ 0, 0, -0 } };
         const OctreeDataContainer points{ 0 };
 
@@ -345,7 +345,7 @@ TEST_F(OctreeTest, FourPointOctreeArbitraryCenter) // NOLINT
         Vector maxValues{ pointCloud.features.rowwise().maxCoeff() };
         Point radii{ maxValues.head(3) - minValues.head(3) };
         const Point expectedOctreeCenter{ minValues.head(3) + radii * 0.5 };
-        const float expectedOctreeRadius{ 2 };
+        const NumericType expectedOctreeRadius{ 2 };
 
         // Assert on top-level octree node.
         // Assertion function signature:
@@ -400,7 +400,7 @@ TEST_F(OctreeTest, FourPointOctreeOriginCenter) // NOLINT
 
         // Compute expected parameters of bounding box.
         const Point expectedOctreeCenter{ 0.0, 0.0, 0.0 };
-        const float expectedOctreeRadius{ 2 };
+        const NumericType expectedOctreeRadius{ 2 };
 
         // Assert on top-level octree node.
         // Assertion function signature:

@@ -87,7 +87,7 @@ TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 	// build test cloud
 	DP ref2DCopy(ref2D);
 	int goodCount(0);
-	const float nan(std::numeric_limits<float>::quiet_NaN());
+	const NumericType nan(std::numeric_limits<NumericType>::quiet_NaN());
 	for (int i(0); i < ref2DCopy.features.cols(); ++i)
 	{
 		if (rand() % 3 == 0)
@@ -456,7 +456,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 	
 	for(const int samplingMethod : {0})
 		for(const size_t maxData : {1,5})
-			for(const float maxSize : {0.,0.05})
+			for(const NumericType maxSize : {0.,0.05})
 			{
 				params.clear();
 				params["maxPointByNode"] = toParam(maxData);
@@ -516,7 +516,7 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 	
 	//Evaluate filter
 	std::vector<size_t> samples = {/* 2*nbPts2D/3, nbPts2D,*/ 1500, 5000, nbPts, nbPts3D};
-	for(const float epsilon : {M_PI/6., M_PI/32., M_PI/64.})
+	for(const NumericType epsilon : {M_PI/6., M_PI/32., M_PI/64.})
 		for(const size_t nbSample : samples)
 		{
 			icp.readingDataPointsFilters.clear();

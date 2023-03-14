@@ -106,7 +106,7 @@ bool RandomPtsSampler<T>::operator()(Octree_<T,dim>& oc)
 		const std::size_t nbData = (*data).size() - 1;
 		const std::size_t randId = 
 			static_cast<std::size_t>( nbData * 
-				(static_cast<float>(std::rand()/static_cast<float>(RAND_MAX))));
+				(static_cast<T>(std::rand()/static_cast<T>(RAND_MAX))));
 				
 		const auto& d = (*data)[randId];
 		

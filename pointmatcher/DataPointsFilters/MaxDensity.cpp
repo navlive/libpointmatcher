@@ -79,8 +79,8 @@ void MaxDensityDataPointsFilter<T>::inPlaceFilter(
 		const T density(densities(0,i));
 		if (density > maxDensity)
 		{
-			const float r = (float)std::rand()/(float)RAND_MAX;
-			float acceptRatio = maxDensity/density;
+			const T r = (T)std::rand()/(T)RAND_MAX;
+			T acceptRatio = maxDensity/density;
 
 			// Handle saturation value of density
 			if (density == lastDensity)

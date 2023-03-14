@@ -14,7 +14,7 @@ static inline Eigen::Transform<NumericType, 2, Eigen::Affine> buildUpTransformat
 }
 
 static inline Eigen::Transform<NumericType, 3, Eigen::Affine> buildUpTransformation3D(const Eigen::Matrix<NumericType, 3, 1>& translation,
-                                                                                      const Eigen::Quaternion<NumericType>& rotation,
+                                                                                      const PM::Quaternion& rotation,
                                                                                       const NumericType scale = 1.0)
 {
     const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation =
@@ -211,7 +211,7 @@ TEST(Transformation, ComputePureTranslationDataPoints3D)
     // Identity.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator);
@@ -220,7 +220,7 @@ TEST(Transformation, ComputePureTranslationDataPoints3D)
     // Pure translation.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ -1.0001, 5, -12321.234 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator);
@@ -272,7 +272,7 @@ TEST(Transformation, ComputeRigidTransformDataPoints3D)
     // Identity.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator);
@@ -281,7 +281,7 @@ TEST(Transformation, ComputeRigidTransformDataPoints3D)
     // Pure translation.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ -1.0001, 5, -12321.234 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator);
@@ -289,7 +289,7 @@ TEST(Transformation, ComputeRigidTransformDataPoints3D)
     // Pure rotation.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, -5, 23, 0.5 };
+        const PM::Quaternion rotation{ 1, -5, 23, 0.5 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator);
@@ -297,7 +297,7 @@ TEST(Transformation, ComputeRigidTransformDataPoints3D)
     // Translation + rotation.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 1, -3, -4 };
-        const Eigen::Quaternion<NumericType> rotation{ 0, -2.54, 0, 0.5 };
+        const PM::Quaternion rotation{ 0, -2.54, 0, 0.5 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator);
@@ -371,7 +371,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
     // Identity.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const NumericType scale{ 1.0 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
@@ -380,7 +380,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
     // Pure Upscaling.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const NumericType scale{ 5.0 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
@@ -389,7 +389,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
     // Pure Downscaling.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const NumericType scale{ 0.1 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
@@ -398,7 +398,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
     // Pure translation + Downscaling.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ -1.0001, 5, -12321.234 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const PM::Quaternion rotation{ 1, 0, 0, 0 };
         const NumericType scale{ 0.5 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
@@ -407,7 +407,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
     // Pure rotation + Upscaling.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
-        const Eigen::Quaternion<NumericType> rotation{ 1, -5, 23, 0.5 };
+        const PM::Quaternion rotation{ 1, -5, 23, 0.5 };
         const NumericType scale{ 1.9 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
@@ -416,7 +416,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
     // Translation + rotation + Upscaling.
     {
         const Eigen::Matrix<NumericType, 3, 1> translation{ 1, -3, -4 };
-        const Eigen::Quaternion<NumericType> rotation{ 0, -2.54, 0, 0.5 };
+        const PM::Quaternion rotation{ 0, -2.54, 0, 0.5 };
         const NumericType scale{ 1.9 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.

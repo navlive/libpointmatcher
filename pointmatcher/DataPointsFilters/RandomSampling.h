@@ -48,8 +48,8 @@ struct RandomSamplingDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
-	
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef PointMatcher<T> PM;
+	typedef typename PM::DataPoints DataPoints;
 	
 	inline static const std::string description()
 	{
@@ -70,5 +70,5 @@ struct RandomSamplingDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	virtual ~RandomSamplingDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
-	Eigen::VectorXf sampleRandomIndices(const size_t nbPoints);
+	typename PM::Vector sampleRandomIndices(const size_t nbPoints);
 };

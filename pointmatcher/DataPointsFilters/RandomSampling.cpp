@@ -58,7 +58,8 @@ RandomSamplingDataPointsFilter<T>::filter(const DataPoints& input)
 
 // In-place filter
 template<typename T>
-Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const size_t nbPoints)
+typename RandomSamplingDataPointsFilter<T>::PM::Vector
+RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const size_t nbPoints)
 {
 	std::random_device randomDevice;
 	std::minstd_rand randomNumberGenerator(randomDevice());
@@ -67,13 +68,13 @@ Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const siz
 	{
 		default:	// Direct RNG.
 		{
-			const float randomNumberRange{static_cast<float>(randomNumberGenerator.max() - randomNumberGenerator.min())};
-			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return static_cast<float>(randomNumberGenerator() / randomNumberRange);});
+			const T randomNumberRange{static_cast<T>(randomNumberGenerator.max() - randomNumberGenerator.min())};
+			return PM::Vector::NullaryExpr(nbPoints, [&](T){return static_cast<T>(randomNumberGenerator() / randomNumberRange);});
 		}
 		case 1:		// Uniform distribution.
 		{
-			std::uniform_real_distribution<float> distribution(0, 1);
-			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return distribution(randomNumberGenerator);});
+			std::uniform_real_distribution<T> distribution(0, 1);
+			return PM::Vector::NullaryExpr(nbPoints, [&](T){return distribution(randomNumberGenerator);});
 		}
 	}
 }
@@ -86,7 +87,7 @@ void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 	const size_t nbPointsIn = cloud.features.cols();
 	const size_t nbPointsOut = nbPointsIn * prob;
 
-	const Eigen::VectorXf randomNumbers{sampleRandomIndices(nbPointsIn)};
+	const typename PM::Vector randomNumbers{sampleRandomIndices(nbPointsIn)};
 	size_t j{0u};
 	for (size_t i{0u}; i < nbPointsIn && j<=nbPointsOut; ++i)
 	{

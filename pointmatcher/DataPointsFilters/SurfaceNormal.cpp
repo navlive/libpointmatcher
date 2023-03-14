@@ -324,7 +324,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 
 	if (degenerateCount)
 	{
-		LOG_WARNING_STREAM("WARNING: Matrix C needed for eigen decomposition was degenerated in " << degenerateCount << " points over " << pointsCount << " (" << float(degenerateCount)*100.f/float(pointsCount) << " %)");
+		LOG_WARNING_STREAM("WARNING: Matrix C needed for eigen decomposition was degenerated in " << degenerateCount << " points over " << pointsCount << " (" << T(degenerateCount)*100.f/T(pointsCount) << " %)");
 	}
 
 }

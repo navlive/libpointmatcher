@@ -386,7 +386,7 @@ void ElipsoidsDataPointsFilter<T>::fuseRange(
   {
     for(int i=0; i<colCount; ++i)
     {
-      const float r = (float)std::rand()/(float)RAND_MAX;
+      const T r = (T)std::rand()/(T)RAND_MAX;
       if(r < ratio)
       {
         // Keep points with their descriptors
