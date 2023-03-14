@@ -98,6 +98,7 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/Loggers.cpp
       utest/ui/Matcher.cpp
       utest/ui/Outliers.cpp
+      utest/ui/PointCloudGenerator.cpp
       utest/ui/Transformations.cpp
       utest/ui/octree/Octree.cpp
       utest/ui/icp/GeneralTests.cpp

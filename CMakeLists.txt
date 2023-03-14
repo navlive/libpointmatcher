@@ -66,6 +66,8 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
 	pointmatcher/DataPointsFilters/OrganizedCloudSurfaceNormal.cpp
+#PointCloudGenerators
+	pointmatcher/PointCloudGenerator.cpp
 )
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
