@@ -1004,5 +1004,8 @@ struct PointMatcher
 
 }; // PointMatcher<T>
 
+extern template struct PointMatcher<float>;
+extern template struct PointMatcher<double>;
+
 #endif // __POINTMATCHER_CORE_H
 

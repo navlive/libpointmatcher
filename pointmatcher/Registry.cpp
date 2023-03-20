@@ -148,3 +148,9 @@ const PointMatcher<T>& PointMatcher<T>::get()
 
 template const PointMatcher<float>& PointMatcher<float>::get();
 template const PointMatcher<double>& PointMatcher<double>::get();
+
+template PointMatcher<float>::PointMatcher();
+template PointMatcher<double>::PointMatcher();
+
+template struct PointMatcher<float>;
+template struct PointMatcher<double>;
