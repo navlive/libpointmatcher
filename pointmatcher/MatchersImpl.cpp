@@ -54,7 +54,38 @@ typename PointMatcher<T>::Matches MatchersImpl<T>::NullMatcher::findClosests(
 template struct MatchersImpl<float>::NullMatcher;
 template struct MatchersImpl<double>::NullMatcher;
 
+// MirrorMatcher
+template<typename T>
+void MatchersImpl<T>::MirrorMatcher::init(const DataPoints& /*filteredReference*/)
+{
+    LOG_INFO_STREAM("* MirrorMatcher: initialized");
+}
 
+template<typename T>
+typename PointMatcher<T>::Matches MatchersImpl<T>::MirrorMatcher::findClosests(const DataPoints& filteredReading)
+{
+    using Index = typename DataPoints::Index;
+    using MatchDists = typename Matches::Dists;
+    using MatchIds = typename Matches::Ids;
+
+    const Index allowedKnnPerPoint{ 1 };
+    const Index pointsCount(filteredReading.features.cols());
+    Matches matches(MatchDists(allowedKnnPerPoint, pointsCount), MatchIds(allowedKnnPerPoint, pointsCount));
+
+    for (Index i = 0; i < pointsCount; ++i)
+    {
+        // As the reference and reading point clouds are known to be equal:
+        // 	Matching distance for point i in reading and reference = 0
+        // 	Index of matching point in reference = i
+        matches.dists(0, i) = 0;
+        matches.ids(0, i) = i;
+    }
+
+    return matches;
+}
+
+template struct MatchersImpl<float>::MirrorMatcher;
+template struct MatchersImpl<double>::MirrorMatcher;
 
 // KDTreeMatcher
 template<typename T>

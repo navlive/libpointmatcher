@@ -71,9 +71,23 @@ struct MatchersImpl
 		virtual Matches findClosests(const DataPoints& filteredReading);
 	};
 
-	struct KDTreeMatcher: public Matcher
-	{
-		inline static const std::string description()
+    struct MirrorMatcher : public Matcher
+    {
+        inline static const std::string description()
+        {
+            return "This matcher matches a point from the reading to 'mirror' in the reference. It should only be used if the reading and "
+                   "reference point clouds are identical.";
+        }
+
+    public:
+        MirrorMatcher() : Matcher("MirrorMatcher", ParametersDoc(), Parameters()) {}
+        virtual void init(const DataPoints& filteredReference);
+        virtual Matches findClosests(const DataPoints& filteredReading);
+    };
+
+    struct KDTreeMatcher : public Matcher
+    {
+        inline static const std::string description()
 		{
 			return "This matcher matches a point from the reading to its closest neighbors in the reference.";
 		}
@@ -100,9 +114,9 @@ struct MatchersImpl
 		virtual ~KDTreeMatcher();
 		virtual void init(const DataPoints& filteredReference);
 		virtual Matches findClosests(const DataPoints& filteredReading);
-	};
+    };
 
-	struct KDTreeVarDistMatcher: public Matcher
+    struct KDTreeVarDistMatcher: public Matcher
 	{
 		inline static const std::string description()
 		{

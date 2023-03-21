@@ -35,6 +35,36 @@ public:
 
 };
 
+TEST_F(MatcherTest, MirrorMatcher)
+{
+    // Generate test data.
+    const PM::StaticCoordVector translation{ PM::StaticCoordVector::Zero() };
+    const PM::Quaternion orientation{ PM::Quaternion::Identity() };
+    const PM::DataPoints::Index numberOfPoints{ 10000 };
+    const PM::ScalarType radius{ 10 };
+    const PM::DataPoints pointCloud{ PM::PointCloudGenerator::generateUniformlySampledSphere(
+        radius, numberOfPoints, translation, orientation) };
+
+    // Init matcher.
+    auto matcher = PM::get().MatcherRegistrar.create("MirrorMatcher", PM::Parameters());
+    matcher->init(pointCloud);
+
+    // Find matches.
+    const auto matches(matcher->findClosests(pointCloud));
+
+    // Validate matches.
+    bool areMatchesPerfect{ true };
+    for (PM::DataPoints::Index i = 0; i < numberOfPoints; ++i)
+    {
+        if ((matches.dists(0, i) != 0) || (matches.ids(0, i) != i))
+        {
+            areMatchesPerfect = false;
+			break;
+        }
+    }
+    ASSERT_TRUE(areMatchesPerfect);
+}
+
 TEST_F(MatcherTest, KDTreeMatcher)
 {
 	vector<unsigned> knn = {1, 2, 3};
