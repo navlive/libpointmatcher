@@ -81,6 +81,13 @@ void PointMatcher<T>::PointCloudGenerator::applyTransformation(const StaticCoord
 }
 
 template<typename T>
+void PointMatcher<T>::PointCloudGenerator::flipNormals(DataPoints& pointCloud)
+{
+    auto normalsView{ pointCloud.getDescriptorViewByName("normals") };
+    normalsView *= -1.0;
+}
+
+template<typename T>
 typename PointMatcher<T>::StaticCoordVector PointMatcher<T>::PointCloudGenerator::computeNormalOfAxisAlignedPlane(
     const StaticCoordVector& axisAlignedPlaneDimensions)
 {
@@ -153,7 +160,8 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
     const ScalarType radius,
     const Index numberOfPoints,
     const StaticCoordVector& translation,
-    const Quaternion& rotation)
+    const Quaternion& rotation,
+    const bool shouldFlipNormals)
 {
     // Create point cloud and add basic structure to fill.
     DataPoints pointCloud;
@@ -185,6 +193,11 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
         normalsView(0, i) = 0;
         normalsView(1, i) = 0;
         normalsView(2, i) = 1;
+    }
+
+    if (shouldFlipNormals)
+    {
+        flipNormals(pointCloud);
     }
 
     // We generated the circle on the ground plane, and now we rotate it based on the translation and rotation arguments of this function.
@@ -253,12 +266,11 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
     }
 
     // Add top and bottom caps.
-    const Quaternion topCapOrientation{ Quaternion::Identity() };
-    const Quaternion bottomCapOrientation{ 0, 1, 0, 0 }; // Flip 180 degrees around x.
+    const Quaternion capOrientation{ Quaternion::Identity() };
     const StaticCoordVector topCapTranslation{ 0.0f, 0.0f, height * 0.5f };
     const StaticCoordVector bottomCapTranslation{ 0.0f, 0.0f, -height * 0.5f };
-    pointCloud.concatenate(generateUniformlySampledCircle(radius, numberOfPointsCap, topCapTranslation, topCapOrientation));
-    pointCloud.concatenate(generateUniformlySampledCircle(radius, numberOfPointsCap, bottomCapTranslation, bottomCapOrientation));
+    pointCloud.concatenate(generateUniformlySampledCircle(radius, numberOfPointsCap, topCapTranslation, capOrientation));
+    pointCloud.concatenate(generateUniformlySampledCircle(radius, numberOfPointsCap, bottomCapTranslation, capOrientation, true));
 
     // Transform point cloud in space.
     applyTransformation(translation, rotation, pointCloud);
@@ -272,7 +284,8 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
     const StaticCoordVector& dimensions,
     const Index numberOfPoints,
     const StaticCoordVector& translation,
-    const Quaternion& rotation)
+    const Quaternion& rotation,
+    const bool shouldFlipNormals)
 {
     // Create point cloud and add basic structure to fill.
     DataPoints pointCloud;
@@ -300,6 +313,11 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
         normalsView(0, i) = normalVector(0);
         normalsView(1, i) = normalVector(1);
         normalsView(2, i) = normalVector(2);
+    }
+
+    if (shouldFlipNormals)
+    {
+        flipNormals(pointCloud);
     }
 
     // We generated the plane on the ground plane, and now we rotate it based on the translation and rotation arguments of this function.
@@ -339,16 +357,16 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
     pointCloud.concatenate(
         generateUniformlySampledPlane(yzFaceDimensions, numberOfPointsPerFace, positiveXaxisFaceCenter, faceOrientation));
     pointCloud.concatenate(
-        generateUniformlySampledPlane(yzFaceDimensions, numberOfPointsPerFace, negativeXaxisFaceCenter, faceOrientation));
+        generateUniformlySampledPlane(yzFaceDimensions, numberOfPointsPerFace, negativeXaxisFaceCenter, faceOrientation, true));
     pointCloud.concatenate(
         generateUniformlySampledPlane(xzFaceDimensions, numberOfPointsPerFace, positiveYaxisFaceCenter, faceOrientation));
     pointCloud.concatenate(
-        generateUniformlySampledPlane(xzFaceDimensions, numberOfPointsPerFace, negativeYaxisFaceCenter, faceOrientation));
+        generateUniformlySampledPlane(xzFaceDimensions, numberOfPointsPerFace, negativeYaxisFaceCenter, faceOrientation, true));
     pointCloud.concatenate(
         generateUniformlySampledPlane(xyFaceDimensions, numberOfPointsPerFace, positiveZaxisFaceCenter, faceOrientation));
     const Index missingPointsLastFace{ numberOfPoints - pointCloud.getNbPoints() - numberOfPointsPerFace };
     pointCloud.concatenate(generateUniformlySampledPlane(
-        xyFaceDimensions, numberOfPointsPerFace + missingPointsLastFace, negativeZaxisFaceCenter, faceOrientation));
+        xyFaceDimensions, numberOfPointsPerFace + missingPointsLastFace, negativeZaxisFaceCenter, faceOrientation, true));
 
     // Transform point cloud in space.
     applyTransformation(translation, rotation, pointCloud);

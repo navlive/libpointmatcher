@@ -88,6 +88,9 @@ install(
 ##########
 find_package(cmake_code_coverage QUIET)
 if(CATKIN_ENABLE_TESTING)
+  # Symbol that controls whether data used for tests should be saved to disk for debugging.
+  set(SAVE_TEST_DATA_TO_DISK 0)
+  add_definitions(-DSAVE_TEST_DATA_TO_DISK=${SAVE_TEST_DATA_TO_DISK})
   catkin_add_gtest(test_pointmatcher
       utest/utest.cpp
       utest/ui/DataFilters.cpp
@@ -102,6 +105,9 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/Transformations.cpp
       utest/ui/octree/Octree.cpp
       utest/ui/icp/GeneralTests.cpp
+      utest/ui/utils_filesystem.cpp
+      utest/ui/utils_geometry.cpp
+      utest/ui/utils_gtest.cpp
   )
   add_dependencies(test_pointmatcher
     pointmatcher

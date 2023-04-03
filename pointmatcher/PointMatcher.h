@@ -928,6 +928,11 @@ struct PointMatcher
         //! @param pointCloud[out]   Point cloud to transform.
         static void applyTransformation(const StaticCoordVector& translation, const Quaternion& rotation, DataPoints& pointCloud);
 
+        //! @brief Flips the normals of a point cloud, multiplying them by -1
+        //!
+        //! @param pointCloud[in/out]   Point cloud that will have its normals flipped.
+        static void flipNormals(DataPoints& pointCloud);
+
         //! @brief Computes a normal vector from a vector that contains the dimensions of a 2D shape in at-most 2 directions.
         //!
         //! @param axisAlignedPlaneDimensions[in]  Dimensions vector.
@@ -946,13 +951,15 @@ struct PointMatcher
 
         //! @brief Generates a uniformly sampled circle, with a given number of points and pose.
         //!
-        //! @param radius[in]          Radius of the circle. [m]
-        //! @param numberOfPoints[in]  Number of points.
-        //! @param translation[in]     Translation with respect to the circle origin, to be used for positioning the circle.
-        //! @param rotation[in]        Rotation with respect to the circle origin, to be used for positioning the circle.
+        //! @param radius[in]              Radius of the circle. [m]
+        //! @param numberOfPoints[in]      Number of points.
+        //! @param translation[in]         Translation with respect to the circle origin, to be used for positioning the circle.
+        //! @param rotation[in]        	   Rotation with respect to the circle origin, to be used for positioning the circle.
+        //! @param shouldFlipNormals[in]   Whether to flip the normals of the newly created plane.
         //! @return DataPoints  Circle's point cloud.
         static DataPoints generateUniformlySampledCircle(const ScalarType radius, const Index numberOfPoints,
-                                                         const StaticCoordVector& translation, const Quaternion& rotation);
+                                                         const StaticCoordVector& translation, const Quaternion& rotation,
+                                                         bool shouldFlipNormals = false);
 
         //! @brief Generates a uniformly sampled cylinder (with no filling), with a given number of points and pose.
         //!
@@ -968,13 +975,15 @@ struct PointMatcher
 
         //! @brief Generates a uniformly sampled plane, with a given number of points and pose.
         //!
-        //! @param dimensions[in]      Dimensions of the plane (length, width, height). [m]
-        //! @param numberOfPoints[in]  Number of points.
-        //! @param translation[in]     Translation with respect to the plane origin, to be used for positioning the plane.
-        //! @param rotation[in]        Rotation with respect to the plane origin, to be used for positioning the plane.
+        //! @param dimensions[in]          Dimensions of the plane (length, width, height). [m]
+        //! @param numberOfPoints[in]      Number of points.
+        //! @param translation[in]         Translation with respect to the plane origin, to be used for positioning the plane.
+        //! @param rotation[in]            Rotation with respect to the plane origin, to be used for positioning the plane.
+        //! @param shouldFlipNormals[in]   Whether to flip the normals of the newly created plane.
         //! @return DataPoints  Plane's point cloud.
         static DataPoints generateUniformlySampledPlane(const StaticCoordVector& dimensions, const Index numberOfPoints,
-                                                        const StaticCoordVector& translation, const Quaternion& rotation);
+                                                        const StaticCoordVector& translation, const Quaternion& rotation,
+                                                        bool shouldFlipNormals = false);
 
         //! @brief Generates a uniformly sampled box (with no filling), with a given number of points and pose.
         //!

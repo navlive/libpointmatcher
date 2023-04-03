@@ -1,5 +1,6 @@
 
 #include "../utest.h"
+#include "utils_filesystem.h"
 
 class PointCloudGeneratorTest : public ::testing::Test
 {
@@ -16,6 +17,48 @@ public:
         numberOfPoints_ = 10000;
     }
 
+    bool checkNormalsPointOutwards(const PM::DataPoints& pointCloud, const PM::Vector& center)
+    {
+        bool allNormalsPointOut{ true };
+        auto normalsView{ pointCloud.getDescriptorViewByName("normals") };
+        for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols(); ++i)
+        {
+            // Fetch point and remove transformation offset.
+            const PM::Vector pointToCenterVector(pointCloud.features.col(i).head(3) - center);
+            const PM::Vector normal{ normalsView.col(i) };
+
+            // We check if the normals of the shape are pointing inwards or outwards.
+            if (pointToCenterVector.dot(normal) < 0)
+            {
+                allNormalsPointOut = false;
+                break;
+            }
+        }
+
+        return allNormalsPointOut;
+    }
+
+    bool dumpTestArtifacts(const std::string& testCase, const PM::DataPoints& pointCloud)
+    {
+        const std::string targetDirectory(testDataFolderPath + testCase + "/");
+
+        // Remove directory, just in case it already exists.
+        if (checkDirectoryExists(targetDirectory))
+        {
+            return removeDirectory(targetDirectory);
+        }
+
+        // Create directory.
+        if (!createDirectory(targetDirectory))
+        {
+            return false;
+        }
+
+        pointCloud.save(targetDirectory + "point_cloud.ply");
+
+        return true;
+    }
+
     // Parameters.
     PM::StaticCoordVector translation_{ PM::StaticCoordVector::Zero() };
     PM::Quaternion orientation_{ PM::Quaternion::Identity() };
@@ -23,6 +66,14 @@ public:
 
     // Error tolerance.
     const PM::ScalarType kEpsilonError_{ 1e-5 };
+
+    //! Whether test data should be saved to disk.
+#ifdef SAVE_TEST_DATA_TO_DISK
+    const bool saveTestDataToDisk{ SAVE_TEST_DATA_TO_DISK };
+#else
+    const bool saveTestDataToDisk{ false };
+#endif
+    const std::string testDataFolderPath{ "/tmp/libpointmatcher/unit_tests/point_cloud_generation/" };
 };
 
 // This test validates that the function that builds up transformations to point clouds is correct. Considers pure translation
@@ -141,7 +192,7 @@ TEST_F(PointCloudGeneratorTest, SphereShape)
     const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
     bool isSphere{ true };
     const PM::ScalarType expectedRadiusSquared{ radius * radius };
-    for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols() && isSphere; ++i)
+    for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols(); ++i)
     {
         // Fetch point and remove transformation offset.
         const PM::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
@@ -154,9 +205,15 @@ TEST_F(PointCloudGeneratorTest, SphereShape)
         if (computedRadiusSquared > expectedRadiusSquared + kEpsilonError_)
         {
             isSphere = false;
+            break;
         }
     }
     ASSERT_TRUE(isSphere);
+    ASSERT_TRUE(checkNormalsPointOutwards(pointCloud, translation_));
+    if (saveTestDataToDisk)
+    {
+        dumpTestArtifacts("Sphere", pointCloud);
+    }
 }
 
 TEST_F(PointCloudGeneratorTest, CylinderShape)
@@ -178,7 +235,7 @@ TEST_F(PointCloudGeneratorTest, CylinderShape)
     const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
     bool isCylinder{ true };
     const PM::ScalarType expectedRadiusSquared = radius * radius;
-    for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols() && isCylinder; ++i)
+    for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols(); ++i)
     {
         // Fetch point and remove transformation offset.
         const PM::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
@@ -192,9 +249,15 @@ TEST_F(PointCloudGeneratorTest, CylinderShape)
         if (computedRadiusSquared > expectedRadiusSquared + kEpsilonError_ || computedHeight > height + kEpsilonError_)
         {
             isCylinder = false;
+            break;
         }
     }
     ASSERT_TRUE(isCylinder);
+    ASSERT_TRUE(checkNormalsPointOutwards(pointCloud, translation_));
+    if (saveTestDataToDisk)
+    {
+        dumpTestArtifacts("Cylinder", pointCloud);
+    }
 }
 
 TEST_F(PointCloudGeneratorTest, BoxShape)
@@ -216,7 +279,7 @@ TEST_F(PointCloudGeneratorTest, BoxShape)
     // Points correspond to volume.
     const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
     bool isCube{ true };
-    for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols() && isCube; ++i)
+    for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols(); ++i)
     {
         // Fetch point and remove transformation offset.
         const PM::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
@@ -227,7 +290,13 @@ TEST_F(PointCloudGeneratorTest, BoxShape)
             || std::abs(centeredPoint(2)) > 0.5f * height + kEpsilonError_)
         {
             isCube = false;
+            break;
         }
     }
     ASSERT_TRUE(isCube);
+    ASSERT_TRUE(checkNormalsPointOutwards(pointCloud, translation_));
+    if (saveTestDataToDisk)
+    {
+        dumpTestArtifacts("Box", pointCloud);
+    }
 }
