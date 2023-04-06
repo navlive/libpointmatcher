@@ -779,9 +779,6 @@ struct PointMatcher
 
 		bool initReference(const DataPoints& referenceIn);
 
-		//! Return the filtered point cloud reading used in the ICP chain
-		const DataPoints& getReadingFiltered() const { return readingFiltered; }
-
 		//! Return the filtered point cloud reference used in the ICP chain
 		const DataPoints& getReferenceFiltered() const { return referenceFiltered; }
 
@@ -798,7 +795,6 @@ struct PointMatcher
 			const TransformationParameters& T_refIn_refMean,
 			const TransformationParameters& initialTransformationParameters);
 
-		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
 		DataPoints referenceFiltered;
 
 		// Transformation from input frame to the center of mass of the reference point cloud.
