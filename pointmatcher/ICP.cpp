@@ -258,7 +258,7 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
-	const TransformationParameters& T_refIn_dataIn,
+	const TransformationParameters& T_refIn_readIn,
 	const bool initializeMatcherWithInputReference)
 {
 	// Ensuring minimum definition of components
@@ -285,7 +285,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	LOG_INFO_STREAM("PointMatcher::icp - reference pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReferencePtsCount = this->referenceFiltered.features.cols();
 	
-	return computeWithTransformedReference(readingIn, this->referenceFiltered, this->T_refIn_refMean, T_refIn_dataIn);
+	return computeWithTransformedReference(readingIn, this->referenceFiltered, this->T_refIn_refMean, T_refIn_readIn);
 	
 }
 template<typename T>
@@ -333,14 +333,14 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	const DataPoints& readingIn, 
 	const DataPoints& reference, 
 	const TransformationParameters& T_refIn_refMean,
-	const TransformationParameters& T_refIn_dataIn)
+	const TransformationParameters& T_refIn_readIn)
 {
 	const int dim(reference.features.rows());
 
-	if (T_refIn_dataIn.cols() != T_refIn_dataIn.rows()) {
+	if (T_refIn_readIn.cols() != T_refIn_readIn.rows()) {
 		throw runtime_error("The initial transformation matrix must be squared.");
 	}
-	if (dim != T_refIn_dataIn.cols()) {
+	if (dim != T_refIn_readIn.cols()) {
 		throw runtime_error("The shape of initial transformation matrix must be NxN. "
 											  "Where N is the number of rows in the read/reference scans.");
 	}
@@ -348,7 +348,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	timer t; // Print how long take the algo
 	
 	// Apply readings filters
-	// reading is express in frame <dataIn>
+	// reading is express in frame <readIn>
 	DataPoints reading(readingIn);
 	//const int nbPtsReading = reading.features.cols();
 	this->readingDataPointsFilters.init();
@@ -357,8 +357,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
 	TransformationParameters 
-		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn;
-	this->transformations.apply(reading, T_refMean_dataIn);
+		T_refMean_readIn = T_refIn_refMean.inverse() * T_refIn_readIn;
+	this->transformations.apply(reading, T_refMean_readIn);
 	
 	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
@@ -452,10 +452,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// T_iter is equivalent to: T_iter(i+1)_iter(0)
 	// the frame <iter(0)> equals <refMean>
 	// so we have: 
-	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
-	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
+	//   T_iter(i+1)_readIn = T_iter(i+1)_iter(0) * T_refMean_readIn
+	//   T_iter(i+1)_readIn = T_iter(i+1)_iter(0) * T_iter(0)_readIn
 	// T_refIn_refMean remove the temperary frame added during initialization
-	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
+	return (T_refIn_refMean * T_iter * T_refMean_readIn);
 }
 
 template struct PointMatcher<float>::ICP;
@@ -595,15 +595,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 //! Apply ICP to cloud cloudIn, with initial guess
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
-	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
+	const DataPoints& cloudIn, const TransformationParameters& T_readInOld_readInNew)
 {
-	return this->compute(cloudIn, T_dataInOld_dataInNew);
+	return this->compute(cloudIn, T_readInOld_readInNew);
 }
 
 //! Apply ICP to cloud cloudIn, with initial guess
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
-	const DataPoints& cloudIn, const TransformationParameters& T_refIn_dataIn)
+	const DataPoints& cloudIn, const TransformationParameters& T_refIn_readIn)
 {
 	// initial keyframe
 	if (!hasMap())
@@ -615,7 +615,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	this->inspector->init();
 	
-	return this->computeWithTransformedReference(cloudIn, mapPointCloud, this->T_refIn_refMean, T_refIn_dataIn);
+	return this->computeWithTransformedReference(cloudIn, mapPointCloud, this->T_refIn_refMean, T_refIn_readIn);
 }
 
 template struct PointMatcher<float>::ICPSequence;
