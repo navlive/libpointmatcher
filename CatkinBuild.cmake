@@ -108,6 +108,12 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/utils_filesystem.cpp
       utest/ui/utils_geometry.cpp
       utest/ui/utils_gtest.cpp
+      utest/ui/utils_transformations.cpp
+      utest/ui/TransformationError.cpp
+      utest/ui/icp/RegistrationTestCase.cpp
+      utest/ui/icp/RegistrationTestResult.cpp
+      utest/ui/icp/utils_registration.cpp
+      utest/ui/icp/Conditioning.cpp
   )
   add_dependencies(test_pointmatcher
     pointmatcher

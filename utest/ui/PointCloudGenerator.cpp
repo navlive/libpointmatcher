@@ -26,9 +26,10 @@ public:
             // Fetch point and remove transformation offset.
             const PM::Vector pointToCenterVector(pointCloud.features.col(i).head(3) - center);
             const PM::Vector normal{ normalsView.col(i) };
+            const PM::ScalarType dotProduct{pointToCenterVector.dot(normal)};
 
             // We check if the normals of the shape are pointing inwards or outwards.
-            if (pointToCenterVector.dot(normal) < 0)
+            if (dotProduct < 0)
             {
                 allNormalsPointOut = false;
                 break;

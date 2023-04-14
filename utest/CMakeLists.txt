@@ -16,6 +16,12 @@ add_executable(utest
                 ui/utils_filesystem.cpp
                 ui/utils_geometry.cpp
                 ui/utils_gtest.cpp
+                ui/utils_transformations.cpp
+                ui/TransformationError.cpp
+                ui/icp/RegistrationTestCase.cpp
+                ui/icp/RegistrationTestResult.cpp
+                ui/icp/utils_registration.cpp
+                ui/icp/Conditioning.cpp
                 )
 
 find_package (Threads)

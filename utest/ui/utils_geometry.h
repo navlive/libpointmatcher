@@ -1,13 +1,10 @@
+#pragma once
 
 #include <cmath>
 
 #include "pointmatcher/PointMatcher.h"
 
 #include "../utest.h"
-
-//! Checks for (approximate) equality of Affine Transformations up to an epsilon.
-bool isApprox(const PM::AffineTransform& transformA, const PM::AffineTransform& transformB, const PM::ScalarType epsilon,
-              std::string& message);
 
 //! Converts an angle from radians to degrees.
 PM::ScalarType convertRadiansToDegrees(const PM::ScalarType angleRadians);
