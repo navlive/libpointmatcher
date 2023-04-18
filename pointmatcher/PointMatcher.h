@@ -759,8 +759,30 @@ struct PointMatcher
         std::string nodeVal(const std::string& regName, const YAML::Node& doc);
 	};
 
-	//! ICP algorithm
-	struct ICP: ICPChainBase
+    /**
+	  <- ICP registration ->
+	  We implement a version of ICP that registers a reading against a reference point clouds, carefully handling their coordinate frames.
+	  We identify three relevant coordinate frames for the ICP problem:
+	  	* Origin: the main reference frame where both the reading and the reference point clouds are represented.
+	    * Reference: the coordinate frame corresponding to the reference point cloud.
+	    * Reading: the coordinate frame corresponding to the reading point cloud.
+	  Our implementation follows these steps:
+		1. Compute the 'global mean',
+		2. Offset the point clouds by subtracting the mean,
+		3. Iteratively compute a transformation T
+		  a. Compute correspondences,
+		  b. Re-compute the mean/center-of-mass of the reading and reference point clouds, using only correspondences.
+		  c. Offset matched point by their mean.
+		  d. Optimize transformation.
+		  e. Remove offset of matched points from the optimized transformation.
+		  f. Compose new transformation T(i) with the previous one T(i-1).
+		4. Offset the computed transformation by adding the 'global mean',
+
+		Removing the mean/CoM from the point clouds, before optimizing a transformation is a critical step for proper numerical conditioning, 
+		akin to offsetting the centroid in Principal Component Analysis. Thanks to this step, our ICP implementation can handle larger baselines,
+		registration far away from the origin, and partially overlapping point clouds.
+	 */
+    struct ICP: ICPChainBase
 	{
 		TransformationParameters operator()(
 			const DataPoints& readingIn,

@@ -309,8 +309,7 @@ bool PointMatcher<T>::ICP::initReference(const DataPoints& referenceIn) {
 
 	// Create intermediate frame at the center of mass of reference pts cloud
 	//  this helps to solve for rotations
-	const long int nbPtsReferenceFiltered{this->referenceFiltered.features.cols()};
-	const Vector meanReference{this->referenceFiltered.features.rowwise().sum() / nbPtsReferenceFiltered};
+	const Vector meanReference{this->referenceFiltered.features.rowwise().mean()};
 	this->T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
 
 	// Readjust reference position:
@@ -354,11 +353,25 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 
+	if (reading.getNbPoints() == 0) {
+		throw runtime_error("The reading point cloud is empty.");
+	}
+
+	// Create intermediate frame at the center of mass of reading pts cloud
+	//  this helps to solve for rotations
+	// const Vector meanReading{reading.features.rowwise().mean()};
+	const Vector meanReading{Vector::Zero(3,3)};
+	Matrix T_readIn_readMean{Matrix::Identity(dim, dim)};
+	T_readIn_readMean.block(0,dim-1, dim-1, 1) = meanReading.head(dim-1);
+
+	// Readjust reading position:
+	reading.features.topRows(dim-1).colwise() -= meanReading.head(dim-1);
+
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
-	TransformationParameters 
-		T_refMean_readIn = T_refIn_refMean.inverse() * T_refIn_readIn;
-	this->transformations.apply(reading, T_refMean_readIn);
+    const TransformationParameters T_refMean_readIn{ this->T_refIn_refMean.inverse() * T_refIn_readIn };
+    const TransformationParameters T_refMean_readMean{ this->T_refIn_refMean.inverse() * T_refIn_readIn * T_readIn_readMean };
+    this->transformations.apply(reading, T_refMean_readMean);
 	
 	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
@@ -404,8 +417,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		
 		assert(this->outlierWeights.rows() == this->matches.ids.rows());
 		assert(this->outlierWeights.cols() == this->matches.ids.cols());
-		
-		// cout << "outlierWeights: " << this->outlierWeights << "\n";
 	
 		
 		//-----------------------------
@@ -421,10 +432,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		T_iter = this->errorMinimizer->compute(
 			stepReading, reference, this->outlierWeights, this->matches) * T_iter;
 		
-		// Old version
-		//T_iter = T_iter * this->errorMinimizer->compute(
-		//	stepReading, reference, outlierWeights, matches);
-		
 		// in test
 		try
 		{
@@ -439,6 +446,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		++iterationCount;
 	}
 	
+	// Having reached this point, T_iter is equivalent to the composition of all intermediate, optimized transformations: T_iter(i+1)_iter(0)
+
 	this->inspector->addStat("IterationsCount", iterationCount);
 	this->inspector->addStat("PointCountTouched", this->matcher->getVisitCount());
 	this->matcher->resetVisitCount();
@@ -448,14 +457,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	LOG_INFO_STREAM("PointMatcher::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]");
 	
-	// Move transformation back to original coordinate (without center of mass)
-	// T_iter is equivalent to: T_iter(i+1)_iter(0)
-	// the frame <iter(0)> equals <refMean>
-	// so we have: 
-	//   T_iter(i+1)_readIn = T_iter(i+1)_iter(0) * T_refMean_readIn
-	//   T_iter(i+1)_readIn = T_iter(i+1)_iter(0) * T_iter(0)_readIn
-	// T_refIn_refMean remove the temperary frame added during initialization
-	return (T_refIn_refMean * T_iter * T_refMean_readIn);
+	// Compute the ICP-corrected transformation from reading to reference mean.
+	const TransformationParameters icpCorrected_T_refMean_readMean{T_iter * T_refMean_readMean};
+
+	// Move transformation back to original coordinate (without center of mass / mean)
+	const TransformationParameters icpCorrected_T_refIn_readIn{T_refIn_refMean * icpCorrected_T_refMean_readMean * T_readIn_readMean.inverse()};
+
+	return icpCorrected_T_refIn_readIn;
 }
 
 template struct PointMatcher<float>::ICP;

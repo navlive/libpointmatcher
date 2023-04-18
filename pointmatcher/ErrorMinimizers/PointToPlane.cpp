@@ -163,6 +163,7 @@ void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
 {
+		// TODO(ynava) Remove unnecessary copy.
 		ErrorElements mPts = mPts_const;
 		return compute_in_place(mPts);
 }
@@ -171,6 +172,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>::compute_in_place(ErrorElements& mPts)
 {
+		// TODO(ynava) Rename mPts to matchedPoints.
 		const int dim = mPts.reading.features.rows();
 		const int nbPts = mPts.reading.features.cols();
 
@@ -184,6 +186,20 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 				mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
 				forcedDim = dim - 2;
 		}
+
+		// This ICP implementation is capable of estimating in 
+		// - 2D
+		// - 3D 
+	    //   * 6DOF (full pose)
+		//   * 4DOF (pose without tilt)
+
+		// Compute the mean of the matched reading and reference point clouds, which represents their Center Of Mass.
+		const Vector meanReadingMatches{mPts.reading.features.topRows(dim-1).rowwise().mean()};
+		const Vector meanReferenceMatches{mPts.reference.features.topRows(dim-1).rowwise().mean()};
+
+		// Shift the reading and reference point clouds by their mean.
+		mPts.reading.features.topRows(dim-1).colwise() -= meanReadingMatches;
+		mPts.reference.features.topRows(dim-1).colwise() -= meanReferenceMatches;
 
 		// Fetch normal vectors of the reference point cloud (with adjustment if needed)
 		const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
@@ -208,7 +224,6 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 			         0, 0, 0;
 			cross = ((matrixGamma*mPts.reading.features).transpose()*normalRef).diagonal().transpose();
 		}
-
 
 		// wF = [weights*cross, weights*normals]
 		// F  = [cross, normals]
@@ -242,46 +257,53 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 		// b = -(wF' * dot)
 		const Vector b = -(wF * dotProd.transpose());
 
+		// Solution vector x, consisting of linearized versions of rotation angles (for 2D [gamma] and for 3D [pitch, roll, yaw])
+		// stacked on top of translational coordinates (for 2D [x,y] and for 3D [x,y,z])
 		Vector x(A.rows());
 
+		// Solve the problem. This is the gist of the optimization where we run least squares to minimize the cost function.
 		solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
 
 		// Transform parameters to matrix
 		Matrix mOut;
 		if(dim == 4 && !force2D)
 		{
-				Eigen::Transform<T, 3, Eigen::Affine> transform;
-				// PLEASE DONT USE EULAR ANGLES!!!!
-				// Rotation in Eular angles follow roll-pitch-yaw (1-2-3) rule
-				/*transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
-				 * Eigen::AngleAxis<T>(x(1), Eigen::Matrix<T,1,3>::UnitY())
-				 * Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());*/
+				/* 3D ICP */
+
+				// Solution vector x = [alpha, beta, gamma, x, y, z]
+				Eigen::Transform<T, 3, Eigen::Affine> T_refMeanMatches_readMeanMatches{Eigen::Transform<T, 3, Eigen::Affine>::Identity()};
 
 				// Normal 6DOF takes the whole rotation vector from the solution to construct the output quaternion
 				if (!force4DOF)
 				{
-					transform = Eigen::AngleAxis<T>(x.head(3).norm(), x.head(3).normalized()); //x=[alpha,beta,gamma,x,y,z]
+					const T rotationAngle{x.head(3).norm()}; // Solution vector x = [<alpha, beta, gamma>, x, y, z]
+					T_refMeanMatches_readMeanMatches = Eigen::AngleAxis<T>(rotationAngle, x.head(3).stableNormalized());
 				} else  // 4DOF needs only one number, the rotation around the Z axis
 				{
 					Vector unitZ(3,1);
 					unitZ << 0,0,1;
-					transform = Eigen::AngleAxis<T>(x(0), unitZ);   //x=[gamma,x,y,z]
+					const T rotationAngle{x(0)}; // Solution vector x = [<gamma>, x, y, z]
+					T_refMeanMatches_readMeanMatches = Eigen::AngleAxis<T>(rotationAngle, unitZ);   //x=[<gamma>,x,y,z]
 				}
 
-				// Reverse roll-pitch-yaw conversion, very useful piece of knowledge, keep it with you all time!
-				/*const T pitch = -asin(transform(2,0));
-					const T roll = atan2(transform(2,1), transform(2,2));
-					const T yaw = atan2(transform(1,0) / cos(pitch), transform(0,0) / cos(pitch));
-					std::cerr << "d angles" << x(0) - roll << ", " << x(1) - pitch << "," << x(2) - yaw << std::endl;*/
+				// Translation.
 				if (!force4DOF)
 				{
-					transform.translation() = x.segment(3, 3);  //x=[alpha,beta,gamma,x,y,z]
+					T_refMeanMatches_readMeanMatches.translation() = x.segment(3, 3);  //x=[alpha,beta,gamma,<x,y,z>]
 				} else
 				{
-					transform.translation() = x.segment(1, 3);  //x=[gamma,x,y,z]
+					T_refMeanMatches_readMeanMatches.translation() = x.segment(1, 3);  //x=[gamma,<x,y,z>]
 				}
 
-				mOut = transform.matrix();
+				// Compute the transformations from reading/reference input frame to their mean.
+				Eigen::Transform<T, 3, Eigen::Affine> T_refIn_refMeanMatches{Eigen::Transform<T, 3, Eigen::Affine>::Identity()};
+				T_refIn_refMeanMatches.translation() = meanReferenceMatches;
+				Eigen::Transform<T, 3, Eigen::Affine> T_readIn_readMeanMatches{Eigen::Transform<T, 3, Eigen::Affine>::Identity()};
+				T_readIn_readMeanMatches.translation() = meanReadingMatches;
+
+				// Move ICP transformation back into the input reference frame, removing the mean / CoM offset.
+				const Eigen::Transform<T, 3, Eigen::Affine> T_refIn_readIn{T_refIn_refMeanMatches * T_refMeanMatches_readMeanMatches * T_readIn_readMeanMatches.inverse()};
+				mOut = T_refIn_readIn.matrix();
 
 				if (mOut != mOut)
 				{
@@ -293,19 +315,34 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 		}
 		else
 		{
-				Eigen::Transform<T, 2, Eigen::Affine> transform;
-				transform = Eigen::Rotation2D<T> (x(0));
-				transform.translation() = x.segment(1, 2);
+				/* 2D ICP */
+
+				// Solution vector x = [gamma, x, y]
+				Eigen::Transform<T, 2, Eigen::Affine> T_refMeanMatches_readMeanMatches{Eigen::Transform<T, 2, Eigen::Affine>::Identity()};
+
+				const T rotationAngle{x(0)}; // Solution vector x = [<gamma>, x, y, z]
+				T_refMeanMatches_readMeanMatches = Eigen::Rotation2D<T> (rotationAngle);
+				
+				T_refMeanMatches_readMeanMatches.translation() = x.segment(1, 2); //x=[gamma,<x,y>]
+
+				// Compute the transformations from reading/reference input frame to their mean.
+				Eigen::Transform<T, 2, Eigen::Affine> T_refIn_refMeanMatches{Eigen::Transform<T, 2, Eigen::Affine>::Identity()};
+				T_refIn_refMeanMatches.translation() = meanReferenceMatches;
+				Eigen::Transform<T, 2, Eigen::Affine> T_readIn_readMeanMatches{Eigen::Transform<T, 2, Eigen::Affine>::Identity()};
+				T_readIn_readMeanMatches.translation() = meanReadingMatches;
+
+				// Move ICP transformation back into the input reference frame, removing the mean / CoM offset.
+				const Eigen::Transform<T, 2, Eigen::Affine> T_refIn_readIn{T_refIn_refMeanMatches * T_refMeanMatches_readMeanMatches * T_readIn_readMeanMatches.inverse()};
 
 				if(force2D)
 				{
 						mOut = Matrix::Identity(dim, dim);
-						mOut.topLeftCorner(2, 2) = transform.matrix().topLeftCorner(2, 2);
-						mOut.topRightCorner(2, 1) = transform.matrix().topRightCorner(2, 1);
+						mOut.topLeftCorner(2, 2) = T_refIn_readIn.matrix().topLeftCorner(2, 2);
+						mOut.topRightCorner(2, 1) = T_refIn_readIn.matrix().topRightCorner(2, 1);
 				}
 				else
 				{
-						mOut = transform.matrix();
+						mOut = T_refIn_readIn.matrix();
 				}
 		}
 		return mOut;
