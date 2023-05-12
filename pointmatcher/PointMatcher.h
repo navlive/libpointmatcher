@@ -611,7 +611,7 @@ struct PointMatcher
 		//! Find the transformation that minimizes the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		//! Find the transformation that minimizes the error given matched pair of points. This function most be defined for all new instances of ErrorMinimizer.
-		virtual TransformationParameters compute(const ErrorElements& matchedPoints) = 0;
+		virtual TransformationParameters compute(ErrorElements& matchedPoints) = 0;
 
 		// helper functions
 		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace

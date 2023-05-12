@@ -161,16 +161,7 @@ void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b
 }
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
-{
-		// TODO(ynava) Remove unnecessary copy.
-		ErrorElements mPts = mPts_const;
-		return compute_in_place(mPts);
-}
-
-
-template<typename T>
-typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>::compute_in_place(ErrorElements& mPts)
+typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>::compute(ErrorElements& mPts)
 {
 		// TODO(ynava) Rename mPts to matchedPoints.
 		const int dim = mPts.reading.features.rows();

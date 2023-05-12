@@ -47,10 +47,9 @@ PointToPointWithCovErrorMinimizer<T>::PointToPointWithCovErrorMinimizer(const Pa
 }
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointToPointWithCovErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
+typename PointMatcher<T>::TransformationParameters PointToPointWithCovErrorMinimizer<T>::compute(ErrorElements& mPts)
 {
-	ErrorElements mPts = mPts_const;
-	typename PointMatcher<T>::TransformationParameters result = PointToPointErrorMinimizer<T>::compute_in_place(mPts);
+	typename PointMatcher<T>::TransformationParameters result = PointToPointErrorMinimizer<T>::compute(mPts);
 	
 	this->covMatrix = this->estimateCovariance(mPts, result);
 	

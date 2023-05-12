@@ -62,8 +62,7 @@ struct PointToPointErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 	
 	PointToPointErrorMinimizer();
 	PointToPointErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
-	virtual TransformationParameters compute(const ErrorElements& mPts);
-	TransformationParameters compute_in_place(ErrorElements& mPts);
+	virtual TransformationParameters compute(ErrorElements& mPts);
 	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 	virtual T getOverlap() const;
 	

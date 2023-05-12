@@ -40,13 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Eigen;
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointToPointSimilarityErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
-{
-	
-	// Copy error element to use as storage later
-	// TODO: check that, might worth it to only copy useful parts
-	ErrorElements mPts = mPts_const;
-	
+typename PointMatcher<T>::TransformationParameters PointToPointSimilarityErrorMinimizer<T>::compute(ErrorElements& mPts)
+{	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
 	//const int ptsCount(mPts.reading.features.cols()); //Both point clouds have now the same number of (matched) point

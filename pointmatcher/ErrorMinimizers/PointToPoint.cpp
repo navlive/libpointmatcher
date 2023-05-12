@@ -52,14 +52,8 @@ PointToPointErrorMinimizer<T>::PointToPointErrorMinimizer(const std::string& cla
 }
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointToPointErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
+typename PointMatcher<T>::TransformationParameters PointToPointErrorMinimizer<T>::compute(ErrorElements& mPts)
 {
-	ErrorElements mPts = mPts_const;
-	return compute_in_place(mPts);
-}
-
-template<typename T>
-typename PointMatcher<T>::TransformationParameters PointToPointErrorMinimizer<T>::compute_in_place(ErrorElements& mPts) {
 	const int dimCount(mPts.reading.features.rows());
 	//const int ptsCount(mPts.reading.features.cols()); //Both point clouds have now the same number of (matched) point
 	

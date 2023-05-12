@@ -59,7 +59,7 @@ struct PointToPointSimilarityErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 																												 PointMatcherSupport::Parametrizable::ParametersDoc(),
 																												 PointMatcherSupport::Parametrizable::Parameters()) {}
 	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-	virtual TransformationParameters compute(const ErrorElements& mPts);
+	virtual TransformationParameters compute(ErrorElements& mPts);
 	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 	virtual T getOverlap() const;
 };

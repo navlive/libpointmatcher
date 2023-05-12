@@ -72,7 +72,7 @@ struct PointToPointWithCovErrorMinimizer: public PointToPointErrorMinimizer<T>
 	Matrix covMatrix;
 	
 	PointToPointWithCovErrorMinimizer(const Parameters& params = Parameters());
-	virtual TransformationParameters compute(const ErrorElements& mPts);
+	virtual TransformationParameters compute(ErrorElements& mPts);
 	virtual Matrix getCovariance() const;
 	Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
 };

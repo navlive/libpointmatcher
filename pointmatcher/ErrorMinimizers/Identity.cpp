@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ErrorMinimizersImpl.h"
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters IdentityErrorMinimizer<T>::compute(const ErrorElements& mPts)
+typename PointMatcher<T>::TransformationParameters IdentityErrorMinimizer<T>::compute(ErrorElements& mPts)
 {
 	const int dim = mPts.reading.getHomogeneousDim();
 	return TransformationParameters::Identity(dim, dim);
