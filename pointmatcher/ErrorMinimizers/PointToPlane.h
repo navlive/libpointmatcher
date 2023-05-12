@@ -48,6 +48,7 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef Parametrizable::ParametersDoc ParametersDoc;
 
     typedef typename PointMatcher<T>::DataPoints DataPoints;
+    typedef typename PointMatcher<T>::DataPoints::Index Index;
     typedef typename PointMatcher<T>::Matches Matches;
     typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
     typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
@@ -80,7 +81,14 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
 
     PointToPlaneErrorMinimizer(const Parameters& params = Parameters());
     PointToPlaneErrorMinimizer(const ParametersDoc paramsDoc, const Parameters& params);
-    //virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+
+    //! Builds linear optimization constraints based on point-matching with a point-to-plane cost.
+    //!  Reference: "A Review of Point Cloud Registration Algorithms for Mobile Robotics" by Pomerleau et al (2015),
+    //! @param mPts[in]   Error Elements containing correspondences between reading and references.
+    //! @param A[out]     Covariance matrix of the point-to-plane error. Size (6,6) for 3D, and (3,3) for 2D problems.
+    //! @param b[out]     Vector of weighted residuals. Size (6,1) for 3D and (3,1) for 2D problems.
+    void formulatePointMatchingConstraints(const ErrorElements& mPts, Matrix& A, Vector& b) const;
+
     virtual TransformationParameters compute(ErrorElements& mPts);
     virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
     virtual T getOverlap() const;

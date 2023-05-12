@@ -104,6 +104,69 @@ PointToPlaneErrorMinimizer<T>::PointToPlaneErrorMinimizer(const ParametersDoc pa
 	}
 }
 
+template<typename T>
+void PointToPlaneErrorMinimizer<T>::formulatePointMatchingConstraints(const ErrorElements& mPts, Matrix& A, Vector& b) const
+{
+    // This function follows the notation and steps from the reference material (see Doxygen).
+
+    const Index dim{ mPts.reading.features.rows() };
+
+    // Fetch normal vectors of the reference point cloud (with adjustment if needed)
+    auto normalRef{ mPts.reference.getDescriptorViewByName("normals").topRows(dim - 1) };
+
+    // Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
+    assert(normalRef.rows() > 0);
+
+    // Compute cross product of cross = cross(reading X normalRef)
+    Matrix cross;
+    Matrix matrixGamma(3, 3);
+    if (!force4DOF)
+    {
+        // Compute cross product of cross = cross(reading X normalRef)
+        cross = this->crossProduct(mPts.reading.features, normalRef);
+    }
+    else
+    {
+        //VK: Instead for "cross" as in 3D, we need only a dot product with the matrixGamma factor for 4DOF
+        //VK: This should be published in 2020 or 2021
+        matrixGamma << 0, -1, 0, 1, 0, 0, 0, 0, 0;
+        cross = ((matrixGamma * mPts.reading.features).transpose() * normalRef).diagonal().transpose();
+    }
+
+    /* Form the matrix of stacked rotational and translation constraints */
+    // wG = [weights*cross, weights*normals]
+    // G  = [cross, normals]
+    Matrix wG(normalRef.rows() + cross.rows(), normalRef.cols());
+    Matrix G(normalRef.rows() + cross.rows(), normalRef.cols());
+
+    for (Index i{ 0 }; i < cross.rows(); ++i)
+    {
+        wG.row(i) = mPts.weights.array() * cross.row(i).array();
+        G.row(i) = cross.row(i);
+    }
+    for (Index i{ 0 }; i < normalRef.rows(); ++i)
+    {
+        wG.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
+        G.row(i + cross.rows()) = normalRef.row(i);
+    }
+
+    /* Form the matrix of residuals */
+    const Matrix deltas{ mPts.reading.features - mPts.reference.features };
+
+    // dot product of dot = dot(deltas, normals)
+    Matrix h{ Matrix::Zero(1, normalRef.cols()) };
+    for (Index i{ 0 }; i < normalRef.rows(); ++i)
+    {
+        h += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
+    }
+
+    /* Constraint formulation for Ax=b */
+    // In the reference material the formulation is   (G * G^T) * Tau = G * h   , hence:
+    // Unadjusted covariance A = wG * G'
+    A = wG * G.transpose();
+    // b = -(wG' * dot)
+    b = -(wG * h.transpose());
+}
 
 template<typename T, typename MatrixA, typename Vector>
 void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x) {
@@ -163,180 +226,131 @@ void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>::compute(ErrorElements& mPts)
 {
-		// TODO(ynava) Rename mPts to matchedPoints.
-		const int dim = mPts.reading.features.rows();
-		const int nbPts = mPts.reading.features.cols();
+    // TODO(ynava) Rename mPts to matchedPoints.
+    const int dim = mPts.reading.features.rows();
+    const int nbPts = mPts.reading.features.cols();
 
-		// Adjust if the user forces 2D minimization on XY-plane
-		int forcedDim = dim - 1;
-		if(force2D && dim == 4)
-		{
-				mPts.reading.features.conservativeResize(3, Eigen::NoChange);
-				mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
-				mPts.reference.features.conservativeResize(3, Eigen::NoChange);
-				mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
-				forcedDim = dim - 2;
-		}
+    // Adjust if the user forces 2D minimization on XY-plane
+    if (force2D && dim == 4)
+    {
+        mPts.reading.features.conservativeResize(3, Eigen::NoChange);
+        mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
+        mPts.reference.features.conservativeResize(3, Eigen::NoChange);
+        mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
+    }
 
-		// This ICP implementation is capable of estimating in 
-		// - 2D
-		// - 3D 
-	    //   * 6DOF (full pose)
-		//   * 4DOF (pose without tilt)
+    // This ICP implementation is capable of estimating in
+    // - 2D
+    // - 3D
+    //   * 6DOF (full pose)
+    //   * 4DOF (pose without tilt)
 
-		// Compute the mean of the matched reading and reference point clouds, which represents their Center Of Mass.
-		const Vector meanReadingMatches{mPts.reading.features.topRows(dim-1).rowwise().mean()};
-		const Vector meanReferenceMatches{mPts.reference.features.topRows(dim-1).rowwise().mean()};
+    // Compute the mean of the matched reading and reference point clouds, which represents their Center Of Mass.
+    const Vector meanReadingMatches{ mPts.reading.features.topRows(dim - 1).rowwise().mean() };
+    const Vector meanReferenceMatches{ mPts.reference.features.topRows(dim - 1).rowwise().mean() };
 
-		// Shift the reading and reference point clouds by their mean.
-		mPts.reading.features.topRows(dim-1).colwise() -= meanReadingMatches;
-		mPts.reference.features.topRows(dim-1).colwise() -= meanReferenceMatches;
+    // Shift the reading and reference point clouds by their mean.
+    mPts.reading.features.topRows(dim - 1).colwise() -= meanReadingMatches;
+    mPts.reference.features.topRows(dim - 1).colwise() -= meanReferenceMatches;
 
-		// Fetch normal vectors of the reference point cloud (with adjustment if needed)
-		const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
+    // Formulate optimization constraints based on point-matching.
+    Matrix A;
+    Vector b;
+    formulatePointMatchingConstraints(mPts, A, b);
 
-		// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
-		assert(normalRef.rows() > 0);
+    // Solution vector x, consisting of linearized versions of rotation angles (for 2D [gamma] and for 3D [pitch, roll, yaw])
+    // stacked on top of translational coordinates (for 2D [x,y] and for 3D [x,y,z])
+    Vector x(A.rows());
 
-		// Compute cross product of cross = cross(reading X normalRef)
-		Matrix cross;
-		Matrix matrixGamma(3,3);
-		if(!force4DOF)
-		{
-			// Compute cross product of cross = cross(reading X normalRef)
-			cross = this->crossProduct(mPts.reading.features, normalRef);
-		}
-		else
-		{
-		   	//VK: Instead for "cross" as in 3D, we need only a dot product with the matrixGamma factor for 4DOF
-		   	//VK: This should be published in 2020 or 2021
-			matrixGamma << 0,-1, 0,
-			         1, 0, 0,
-			         0, 0, 0;
-			cross = ((matrixGamma*mPts.reading.features).transpose()*normalRef).diagonal().transpose();
-		}
+    // Solve the problem. This is the gist of the optimization where we run least squares to minimize the cost function.
+    solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
 
-		// wF = [weights*cross, weights*normals]
-		// F  = [cross, normals]
-		Matrix wF(normalRef.rows()+ cross.rows(), normalRef.cols());
-		Matrix F(normalRef.rows()+ cross.rows(), normalRef.cols());
+    // Transform parameters to matrix
+    Matrix mOut;
+    if (dim == 4 && !force2D)
+    {
+        /* 3D ICP */
 
-		for(int i=0; i < cross.rows(); i++)
-		{
-				wF.row(i) = mPts.weights.array() * cross.row(i).array();
-				F.row(i) = cross.row(i);
-		}
-		for(int i=0; i < normalRef.rows(); i++)
-		{
-				wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
-				F.row(i + cross.rows()) = normalRef.row(i);
-		}
+        // Solution vector x = [alpha, beta, gamma, x, y, z]
+        Eigen::Transform<T, 3, Eigen::Affine> T_refMeanMatches_readMeanMatches{ Eigen::Transform<T, 3, Eigen::Affine>::Identity() };
 
-		// Unadjust covariance A = wF * F'
-		const Matrix A = wF * F.transpose();
+        // Normal 6DOF takes the whole rotation vector from the solution to construct the output quaternion
+        if (!force4DOF)
+        {
+            const T rotationAngle{ x.head(3).norm() }; // Solution vector x = [<alpha, beta, gamma>, x, y, z]
+            T_refMeanMatches_readMeanMatches = Eigen::AngleAxis<T>(rotationAngle, x.head(3).stableNormalized());
+        }
+        else // 4DOF needs only one number, the rotation around the Z axis
+        {
+            Vector unitZ(3, 1);
+            unitZ << 0, 0, 1;
+            const T rotationAngle{ x(0) }; // Solution vector x = [<gamma>, x, y, z]
+            T_refMeanMatches_readMeanMatches = Eigen::AngleAxis<T>(rotationAngle, unitZ); //x=[<gamma>,x,y,z]
+        }
 
-		const Matrix deltas = mPts.reading.features - mPts.reference.features;
+        // Translation.
+        if (!force4DOF)
+        {
+            T_refMeanMatches_readMeanMatches.translation() = x.segment(3, 3); //x=[alpha,beta,gamma,<x,y,z>]
+        }
+        else
+        {
+            T_refMeanMatches_readMeanMatches.translation() = x.segment(1, 3); //x=[gamma,<x,y,z>]
+        }
 
-		// dot product of dot = dot(deltas, normals)
-		Matrix dotProd = Matrix::Zero(1, normalRef.cols());
+        // Compute the transformations from reading/reference input frame to their mean.
+        Eigen::Transform<T, 3, Eigen::Affine> T_refIn_refMeanMatches{ Eigen::Transform<T, 3, Eigen::Affine>::Identity() };
+        T_refIn_refMeanMatches.translation() = meanReferenceMatches;
+        Eigen::Transform<T, 3, Eigen::Affine> T_readIn_readMeanMatches{ Eigen::Transform<T, 3, Eigen::Affine>::Identity() };
+        T_readIn_readMeanMatches.translation() = meanReadingMatches;
 
-		for(int i=0; i<normalRef.rows(); i++)
-		{
-				dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
-		}
+        // Move ICP transformation back into the input reference frame, removing the mean / CoM offset.
+        const Eigen::Transform<T, 3, Eigen::Affine> T_refIn_readIn{ T_refIn_refMeanMatches * T_refMeanMatches_readMeanMatches
+                                                                    * T_readIn_readMeanMatches.inverse() };
+        mOut = T_refIn_readIn.matrix();
 
-		// b = -(wF' * dot)
-		const Vector b = -(wF * dotProd.transpose());
+        if (mOut != mOut)
+        {
+            // Degenerate situation. This can happen when the source and reading clouds
+            // are identical, and then b and x above are 0, and the rotation matrix cannot
+            // be determined, it comes out full of NaNs. The correct rotation is the identity.
+            mOut.block(0, 0, dim - 1, dim - 1) = Matrix::Identity(dim - 1, dim - 1);
+        }
+    }
+    else
+    {
+        /* 2D ICP */
 
-		// Solution vector x, consisting of linearized versions of rotation angles (for 2D [gamma] and for 3D [pitch, roll, yaw])
-		// stacked on top of translational coordinates (for 2D [x,y] and for 3D [x,y,z])
-		Vector x(A.rows());
+        // Solution vector x = [gamma, x, y]
+        Eigen::Transform<T, 2, Eigen::Affine> T_refMeanMatches_readMeanMatches{ Eigen::Transform<T, 2, Eigen::Affine>::Identity() };
 
-		// Solve the problem. This is the gist of the optimization where we run least squares to minimize the cost function.
-		solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
+        const T rotationAngle{ x(0) }; // Solution vector x = [<gamma>, x, y, z]
+        T_refMeanMatches_readMeanMatches = Eigen::Rotation2D<T>(rotationAngle);
 
-		// Transform parameters to matrix
-		Matrix mOut;
-		if(dim == 4 && !force2D)
-		{
-				/* 3D ICP */
+        T_refMeanMatches_readMeanMatches.translation() = x.segment(1, 2); //x=[gamma,<x,y>]
 
-				// Solution vector x = [alpha, beta, gamma, x, y, z]
-				Eigen::Transform<T, 3, Eigen::Affine> T_refMeanMatches_readMeanMatches{Eigen::Transform<T, 3, Eigen::Affine>::Identity()};
+        // Compute the transformations from reading/reference input frame to their mean.
+        Eigen::Transform<T, 2, Eigen::Affine> T_refIn_refMeanMatches{ Eigen::Transform<T, 2, Eigen::Affine>::Identity() };
+        T_refIn_refMeanMatches.translation() = meanReferenceMatches;
+        Eigen::Transform<T, 2, Eigen::Affine> T_readIn_readMeanMatches{ Eigen::Transform<T, 2, Eigen::Affine>::Identity() };
+        T_readIn_readMeanMatches.translation() = meanReadingMatches;
 
-				// Normal 6DOF takes the whole rotation vector from the solution to construct the output quaternion
-				if (!force4DOF)
-				{
-					const T rotationAngle{x.head(3).norm()}; // Solution vector x = [<alpha, beta, gamma>, x, y, z]
-					T_refMeanMatches_readMeanMatches = Eigen::AngleAxis<T>(rotationAngle, x.head(3).stableNormalized());
-				} else  // 4DOF needs only one number, the rotation around the Z axis
-				{
-					Vector unitZ(3,1);
-					unitZ << 0,0,1;
-					const T rotationAngle{x(0)}; // Solution vector x = [<gamma>, x, y, z]
-					T_refMeanMatches_readMeanMatches = Eigen::AngleAxis<T>(rotationAngle, unitZ);   //x=[<gamma>,x,y,z]
-				}
+        // Move ICP transformation back into the input reference frame, removing the mean / CoM offset.
+        const Eigen::Transform<T, 2, Eigen::Affine> T_refIn_readIn{ T_refIn_refMeanMatches * T_refMeanMatches_readMeanMatches
+                                                                    * T_readIn_readMeanMatches.inverse() };
 
-				// Translation.
-				if (!force4DOF)
-				{
-					T_refMeanMatches_readMeanMatches.translation() = x.segment(3, 3);  //x=[alpha,beta,gamma,<x,y,z>]
-				} else
-				{
-					T_refMeanMatches_readMeanMatches.translation() = x.segment(1, 3);  //x=[gamma,<x,y,z>]
-				}
-
-				// Compute the transformations from reading/reference input frame to their mean.
-				Eigen::Transform<T, 3, Eigen::Affine> T_refIn_refMeanMatches{Eigen::Transform<T, 3, Eigen::Affine>::Identity()};
-				T_refIn_refMeanMatches.translation() = meanReferenceMatches;
-				Eigen::Transform<T, 3, Eigen::Affine> T_readIn_readMeanMatches{Eigen::Transform<T, 3, Eigen::Affine>::Identity()};
-				T_readIn_readMeanMatches.translation() = meanReadingMatches;
-
-				// Move ICP transformation back into the input reference frame, removing the mean / CoM offset.
-				const Eigen::Transform<T, 3, Eigen::Affine> T_refIn_readIn{T_refIn_refMeanMatches * T_refMeanMatches_readMeanMatches * T_readIn_readMeanMatches.inverse()};
-				mOut = T_refIn_readIn.matrix();
-
-				if (mOut != mOut)
-				{
-						// Degenerate situation. This can happen when the source and reading clouds
-						// are identical, and then b and x above are 0, and the rotation matrix cannot
-						// be determined, it comes out full of NaNs. The correct rotation is the identity.
-						mOut.block(0, 0, dim-1, dim-1) = Matrix::Identity(dim-1, dim-1);
-				}
-		}
-		else
-		{
-				/* 2D ICP */
-
-				// Solution vector x = [gamma, x, y]
-				Eigen::Transform<T, 2, Eigen::Affine> T_refMeanMatches_readMeanMatches{Eigen::Transform<T, 2, Eigen::Affine>::Identity()};
-
-				const T rotationAngle{x(0)}; // Solution vector x = [<gamma>, x, y, z]
-				T_refMeanMatches_readMeanMatches = Eigen::Rotation2D<T> (rotationAngle);
-				
-				T_refMeanMatches_readMeanMatches.translation() = x.segment(1, 2); //x=[gamma,<x,y>]
-
-				// Compute the transformations from reading/reference input frame to their mean.
-				Eigen::Transform<T, 2, Eigen::Affine> T_refIn_refMeanMatches{Eigen::Transform<T, 2, Eigen::Affine>::Identity()};
-				T_refIn_refMeanMatches.translation() = meanReferenceMatches;
-				Eigen::Transform<T, 2, Eigen::Affine> T_readIn_readMeanMatches{Eigen::Transform<T, 2, Eigen::Affine>::Identity()};
-				T_readIn_readMeanMatches.translation() = meanReadingMatches;
-
-				// Move ICP transformation back into the input reference frame, removing the mean / CoM offset.
-				const Eigen::Transform<T, 2, Eigen::Affine> T_refIn_readIn{T_refIn_refMeanMatches * T_refMeanMatches_readMeanMatches * T_readIn_readMeanMatches.inverse()};
-
-				if(force2D)
-				{
-						mOut = Matrix::Identity(dim, dim);
-						mOut.topLeftCorner(2, 2) = T_refIn_readIn.matrix().topLeftCorner(2, 2);
-						mOut.topRightCorner(2, 1) = T_refIn_readIn.matrix().topRightCorner(2, 1);
-				}
-				else
-				{
-						mOut = T_refIn_readIn.matrix();
-				}
-		}
-		return mOut;
+        if (force2D)
+        {
+            mOut = Matrix::Identity(dim, dim);
+            mOut.topLeftCorner(2, 2) = T_refIn_readIn.matrix().topLeftCorner(2, 2);
+            mOut.topRightCorner(2, 1) = T_refIn_readIn.matrix().topRightCorner(2, 1);
+        }
+        else
+        {
+            mOut = T_refIn_readIn.matrix();
+        }
+    }
+    return mOut;
 }
 
 
