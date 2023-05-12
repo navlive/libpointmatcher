@@ -169,6 +169,33 @@ void PointToPlaneErrorMinimizer<T>::formulatePointMatchingConstraints(const Erro
 }
 
 template<typename T, typename MatrixA, typename Vector>
+bool solveLinearSystem(const MatrixA& A, const Vector& b, Vector& x)
+{
+    static constexpr T kNumericalErrorTolerance{ 1e-5 };
+
+    assert(A.cols() == A.rows());
+    assert(b.cols() == 1);
+    assert(b.rows() == A.rows());
+    assert(x.cols() == 1);
+    assert(x.rows() == A.cols());
+
+    // SVD, exists for all matrices without exception. If there is a solution it will find it despite not being optimum.
+    x = A.template cast<double>().jacobiSvd(ComputeThinU | ComputeThinV).solve(b.template cast<double>()).template cast<T>();
+
+    const Vector ax{(A * x).eval()};
+    if ((b - ax).norm() > kNumericalErrorTolerance * std::max(A.norm() * x.norm(), b.norm()))
+    {
+        LOG_WARNING_STREAM("PointMatcher::icp - encountered numerically singular matrix while minimizing point to plane "
+                           "distance."
+                           << " b=" << b.transpose() << " !~ A * x=" << (ax).transpose().eval() << ": ||b- ax||=" << (b - ax).norm()
+                           << ", ||b||=" << b.norm() << ", ||ax||=" << ax.norm());
+        return false;
+    }
+
+    return true;
+}
+
+template<typename T, typename MatrixA, typename Vector>
 void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x) {
 	assert(A.cols() == A.rows());
 	assert(b.cols() == 1);

@@ -47,6 +47,7 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef Parametrizable::ParameterDoc ParameterDoc;
     typedef Parametrizable::ParametersDoc ParametersDoc;
 
+    typedef typename PointMatcher<T>::ScalarType ScalarType;
     typedef typename PointMatcher<T>::DataPoints DataPoints;
     typedef typename PointMatcher<T>::DataPoints::Index Index;
     typedef typename PointMatcher<T>::Matches Matches;
@@ -96,6 +97,18 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     static T computeResidualError(ErrorElements mPts, const bool& force2D);
 };
 
+//! Solves a linear system of the form Ax=b employing the Jacobi SVD algorithm (https://eigen.tuxfamily.org/dox/classEigen_1_1JacobiSVD.html)
+//!   This method makes no assumption on the properties of the constraint matrices. SVD exists for all matrices without exception. If there is
+//!   a solution it will find it despite not being optimal.
+//! @param A[in]  Covariance matrix of the errors.
+//! @param b[in]  Matrix of weighted residuals.
+//! @param x[out] Solution vector.
+//! @return bool  If the linear system could be solved in a numerically stable manner, false otherwise.
+template<typename T, typename MatrixA, typename Vector>
+bool solveLinearSystem(const MatrixA& A, const Vector& b, Vector& x);
+
+// TODO(ynava) Deprecate, behavior is not well-justified, as solving the linear problem is not a real performance bottleneck for point-to-plane ICP.
+//! Solves a linear system of the form Ax=b, trying out different solvers, with the aim of using the fastest solver for the task.
 template<typename T, typename MatrixA, typename Vector>
 void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x);
 
