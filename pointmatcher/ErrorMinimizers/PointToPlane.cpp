@@ -133,27 +133,14 @@ void PointToPlaneErrorMinimizer<T>::formulatePointMatchingConstraints(const Erro
         cross = ((matrixGamma * mPts.reading.features).transpose() * normalRef).diagonal().transpose();
     }
 
-    /* Form the matrix of stacked rotational and translation constraints */
-    // wG = [weights*cross, weights*normals]
+    /* Form G, the matrix of stacked rotational and translation constraints */
     // G  = [cross, normals]
-    Matrix wG(normalRef.rows() + cross.rows(), normalRef.cols());
     Matrix G(normalRef.rows() + cross.rows(), normalRef.cols());
+    G << cross, normalRef;
 
-    for (Index i{ 0 }; i < cross.rows(); ++i)
-    {
-        wG.row(i) = mPts.weights.array() * cross.row(i).array();
-        G.row(i) = cross.row(i);
-    }
-    for (Index i{ 0 }; i < normalRef.rows(); ++i)
-    {
-        wG.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
-        G.row(i + cross.rows()) = normalRef.row(i);
-    }
-
-    /* Form the matrix of residuals */
+    /* Form h, the matrix of residuals*/
+    // h is the sum of of dot(deltas, normals)
     const Matrix deltas{ mPts.reading.features - mPts.reference.features };
-
-    // dot product of dot = dot(deltas, normals)
     Matrix h{ Matrix::Zero(1, normalRef.cols()) };
     for (Index i{ 0 }; i < normalRef.rows(); ++i)
     {
@@ -161,11 +148,11 @@ void PointToPlaneErrorMinimizer<T>::formulatePointMatchingConstraints(const Erro
     }
 
     /* Constraint formulation for Ax=b */
-    // In the reference material the formulation is   (G * G^T) * Tau = G * h   , hence:
-    // Unadjusted covariance A = wG * G'
-    A = wG * G.transpose();
-    // b = -(wG' * dot)
-    b = -(wG * h.transpose());
+    // In the reference material the formulation is   (G * G') * Tau = G * h   , hence:
+    // Unadjusted covariance A = G * G'
+    A = G * G.transpose();
+    // b = -(G' * dot)
+    b = -(G * h.transpose());
 }
 
 template<typename T, typename MatrixA, typename Vector>
