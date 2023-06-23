@@ -288,6 +288,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	return computeWithTransformedReference(readingIn, this->referenceFiltered, this->T_refIn_refMean, T_refIn_readIn);
 	
 }
+
 template<typename T>
 bool PointMatcher<T>::ICP::initReference(const DataPoints& referenceIn) {
 	const long int nbPtsReference{referenceIn.features.cols()};
