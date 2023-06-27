@@ -970,7 +970,7 @@ void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const u
 		if (descDim != dim)
 		{
 			throw InvalidField(
-				(boost::format("The existing field %1% has dimension %2%, different than requested dimension %3%") % name % descDim % dim).str()
+				(boost::format("The existing field '%1%' has dimension %2%, different than requested dimension %3%") % name % descDim % dim).str()
 			);
 		}
 	}
@@ -1004,7 +1004,7 @@ void PointMatcher<T>::DataPoints::allocateFields(const Labels& newLabels, Labels
 			{
 				if (it->span != newSpan)
 					throw InvalidField(
-						(boost::format("The existing field %1% has dimension %2%, different than requested dimension %3%") % newName % it->span % newSpan).str()
+						(boost::format("The existing field '%1%' has dimension %2%, different than requested dimension %3%") % newName % it->span % newSpan).str()
 					);
 				present[i] = true;
 				break;
@@ -1054,14 +1054,14 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 			else
 			{
 				stringstream errorMsg;
-				errorMsg << "The field " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << "new: " << newPointCount;
+				errorMsg << "The field '" << name << "' cannot be added because the number of points is not the same. Old point count: " << pointCount << "new: " << newPointCount;
 				throw InvalidField(errorMsg.str());
 			}
 		}
 		else
 		{
 			stringstream errorMsg;
-			errorMsg << "The field " << name << " already exists but could not be added because the dimension is not the same. Old dim: " << fieldDim << " new: " << newFieldDim;
+			errorMsg << "The field '" << name << "' already exists but could not be added because the dimension is not the same. Old dim: " << fieldDim << " new: " << newFieldDim;
 			throw InvalidField(errorMsg.str());
 		}
 	}
@@ -1078,7 +1078,7 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 		else
 		{
 			stringstream errorMsg;
-			errorMsg << "The field " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << " new: " << newPointCount;
+			errorMsg << "The field '" << name << "' cannot be appended because the number of points is not the same. Old point count: " << pointCount << " new: " << newPointCount;
 			throw InvalidField(errorMsg.str());
 		}
 	}
