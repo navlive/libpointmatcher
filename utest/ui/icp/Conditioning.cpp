@@ -1,11 +1,12 @@
 
 #include <vector>
 
+#include <pointmatcher/testing/utils_filesystem.h>
+#include <pointmatcher/testing/utils_geometry.h>
+#include <pointmatcher/testing/utils_gtest.h>
+#include <pointmatcher/testing/utils_transformations.h>
+
 #include "../../utest.h"
-#include "../utils_filesystem.h"
-#include "../utils_gtest.h"
-#include "../utils_geometry.h"
-#include "../utils_transformations.h"
 #include "RegistrationTestCase.h"
 #include "RegistrationTestResult.h"
 #include "utils_registration.h"

@@ -2,9 +2,8 @@
 
 #include <cmath>
 
-#include "pointmatcher/PointMatcher.h"
-
-#include "../utest.h"
+#include "../PointMatcher.h"
+#include "typedefs.h"
 
 //! Converts an angle from radians to degrees.
 PM::ScalarType convertRadiansToDegrees(const PM::ScalarType angleRadians);

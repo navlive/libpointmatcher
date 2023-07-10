@@ -1,6 +1,7 @@
 
 #include "../utest.h"
-#include "utils_filesystem.h"
+
+#include "pointmatcher/testing/utils_filesystem.h"
 
 class PointCloudGeneratorTest : public ::testing::Test
 {

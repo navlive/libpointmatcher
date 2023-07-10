@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "../utils_geometry.h"
+#include <pointmatcher/testing/utils_geometry.h>
 
 RegistrationTestCase::RegistrationTestCase(const std::string name, const PM::DataPoints::Index numberOfPoints, const PM::ScalarType scale,
                                            const PM::StaticCoordVector& trans_origin_ref, const PM::Quaternion& R_origin_ref,

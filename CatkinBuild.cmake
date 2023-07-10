@@ -28,6 +28,7 @@ catkin_package(
   LIBRARIES
     yaml-cpp
     pointmatcher
+    pointmatcher_testing
   CATKIN_DEPENDS
     ${CATKIN_PACKAGE_DEPENDENCIES}
   DEPENDS
@@ -66,12 +67,46 @@ target_link_libraries(pointmatcher
   yaml-cpp
 )
 
+# Testing utils
+add_library(pointmatcher_testing
+  pointmatcher/testing/utils_filesystem.cpp
+  pointmatcher/testing/utils_filesystem.h
+  pointmatcher/testing/utils_geometry.cpp
+  pointmatcher/testing/utils_geometry.h
+  pointmatcher/testing/utils_gtest.cpp
+  pointmatcher/testing/utils_transformations.cpp
+  pointmatcher/testing/TransformationError.cpp
+)
+add_dependencies(pointmatcher_testing
+  pointmatcher
+)
+target_include_directories(pointmatcher_testing PUBLIC
+  ${CMAKE_SOURCE_DIR}/testing
+)
+target_include_directories(pointmatcher_testing SYSTEM PRIVATE
+  ${EIGEN3_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
+target_link_libraries(pointmatcher_testing
+  ${catkin_LIBRARIES}
+  Boost::chrono
+  Boost::date_time
+  Boost::filesystem
+  Boost::program_options
+  Boost::thread
+  Boost::timer
+  Boost::system
+  yaml-cpp
+)
+
 #############
 ## Install ##
 #############
 install(
   TARGETS
     pointmatcher
+    pointmatcher_testing
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -105,11 +140,6 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/Transformations.cpp
       utest/ui/octree/Octree.cpp
       utest/ui/icp/GeneralTests.cpp
-      utest/ui/utils_filesystem.cpp
-      utest/ui/utils_geometry.cpp
-      utest/ui/utils_gtest.cpp
-      utest/ui/utils_transformations.cpp
-      utest/ui/TransformationError.cpp
       utest/ui/icp/RegistrationTestCase.cpp
       utest/ui/icp/RegistrationTestResult.cpp
       utest/ui/icp/utils_registration.cpp
@@ -117,12 +147,14 @@ if(CATKIN_ENABLE_TESTING)
   )
   add_dependencies(test_pointmatcher
     pointmatcher
+    pointmatcher_testing
   )
   target_include_directories(test_pointmatcher PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/pointmatcher
     ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
     ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
+    ${CMAKE_SOURCE_DIR}/testing
   )
   target_include_directories(test_pointmatcher SYSTEM PUBLIC
     ${EIGEN3_INCLUDE_DIR}
@@ -131,6 +163,7 @@ if(CATKIN_ENABLE_TESTING)
   )
   target_link_libraries(test_pointmatcher
     pointmatcher
+    pointmatcher_testing
     yaml-cpp
     ${catkin_LIBRARIES}
   )

@@ -2,9 +2,8 @@
 
 #include <cmath>
 
-#include "pointmatcher/PointMatcher.h"
+#include "../PointMatcher.h"
 
-#include "../utest.h"
 #include "TransformationError.h"
 
 /**

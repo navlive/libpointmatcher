@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "../utils_filesystem.h"
+#include <pointmatcher/testing/utils_filesystem.h>
 
 
 bool configureIcp(const std::string& filePath, const std::string& configFileName, PM::ICP& icp)
