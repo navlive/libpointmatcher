@@ -4,12 +4,12 @@
 #include <pointmatcher/testing/utils_filesystem.h>
 #include <pointmatcher/testing/utils_geometry.h>
 #include <pointmatcher/testing/utils_gtest.h>
+#include <pointmatcher/testing/RegistrationTestCase.h>
+#include <pointmatcher/testing/RegistrationTestResult.h>
+#include <pointmatcher/testing/utils_registration.h>
 #include <pointmatcher/testing/utils_transformations.h>
 
 #include "../../utest.h"
-#include "RegistrationTestCase.h"
-#include "RegistrationTestResult.h"
-#include "utils_registration.h"
 
 class ICPConditioningTest : public ::testing::Test
 {

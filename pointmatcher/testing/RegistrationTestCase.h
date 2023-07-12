@@ -3,9 +3,9 @@
 #include <string>
 #include <ostream>
 
-#include "pointmatcher/PointMatcher.h"
+#include "../PointMatcher.h"
 
-#include "../../utest.h"
+#include "typedefs.h"
 
 //! A structure containing the configurations for running a registration test: true transformations, initial guesses,
 //! name of the test case, point clouds to register, and their geometric characteristics.

@@ -74,7 +74,10 @@ add_library(pointmatcher_testing
   pointmatcher/testing/utils_geometry.cpp
   pointmatcher/testing/utils_geometry.h
   pointmatcher/testing/utils_gtest.cpp
+  pointmatcher/testing/utils_registration.cpp
   pointmatcher/testing/utils_transformations.cpp
+  pointmatcher/testing/RegistrationTestCase.cpp
+  pointmatcher/testing/RegistrationTestResult.cpp
   pointmatcher/testing/TransformationError.cpp
 )
 add_dependencies(pointmatcher_testing
@@ -140,9 +143,6 @@ if(CATKIN_ENABLE_TESTING)
       utest/ui/Transformations.cpp
       utest/ui/octree/Octree.cpp
       utest/ui/icp/GeneralTests.cpp
-      utest/ui/icp/RegistrationTestCase.cpp
-      utest/ui/icp/RegistrationTestResult.cpp
-      utest/ui/icp/utils_registration.cpp
       utest/ui/icp/Conditioning.cpp
   )
   add_dependencies(test_pointmatcher

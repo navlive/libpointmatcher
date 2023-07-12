@@ -1,6 +1,6 @@
 #include "RegistrationTestResult.h"
 
-#include <pointmatcher/testing/utils_geometry.h>
+#include "utils_geometry.h"
 
 std::ostream& operator<<(std::ostream& ostream, const RegistrationTestResult& testResult)
 {

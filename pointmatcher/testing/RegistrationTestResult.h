@@ -2,9 +2,9 @@
 
 #include <ostream>
 
-#include "pointmatcher/PointMatcher.h"
+#include "../PointMatcher.h"
 
-#include "../../utest.h"
+#include "typedefs.h"
 
 //! A struct for storing the results of a registration test, containing algorithmic outputs, such as transformations, error messages, success flags, and metrics.
 struct RegistrationTestResult

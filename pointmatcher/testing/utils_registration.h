@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "pointmatcher/PointMatcher.h"
+#include "../PointMatcher.h"
 
-#include "../../utest.h"
+#include "typedefs.h"
 #include "RegistrationTestResult.h"
 
 //! Configures ICP based on a config file.

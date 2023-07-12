@@ -1,9 +1,10 @@
 
 #include "utils_registration.h"
 
+#include <fstream>
 #include <memory>
 
-#include <pointmatcher/testing/utils_filesystem.h>
+#include "utils_filesystem.h"
 
 
 bool configureIcp(const std::string& filePath, const std::string& configFileName, PM::ICP& icp)
