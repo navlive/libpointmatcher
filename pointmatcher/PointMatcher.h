@@ -186,6 +186,10 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	//! A dense signed 64-bits matrix
 	typedef typename Eigen::Matrix<Int64, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+	//! A dense, fixed-size 3x3 matrix over ScalarType
+	typedef typename Eigen::Matrix<T, 3, 3> Matrix33;
+	//! A dense, fixed-size 6x6 matrix over ScalarType
+	typedef typename Eigen::Matrix<T, 6, 6> Matrix66;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
 	//! An affine transform over ScalarType
