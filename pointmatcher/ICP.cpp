@@ -361,7 +361,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// Create intermediate frame at the center of mass of reading pts cloud
 	//  this helps to solve for rotations
 	// const Vector meanReading{reading.features.rowwise().mean()};
-	const Vector meanReading{Vector::Zero(3,3)};
+	const Vector meanReading{Vector::Zero(3,1)};
 	Matrix T_readIn_readMean{Matrix::Identity(dim, dim)};
 	T_readIn_readMean.block(0,dim-1, dim-1, 1) = meanReading.head(dim-1);
 
