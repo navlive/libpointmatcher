@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.8)
 project(libpointmatcher)
 
 # Pointmatcher lib and install
@@ -77,9 +77,10 @@ file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 #	* cmake.
 #	* ament (future).
 # Regardless of the type chosen, the library 'libnabo' must be configured in the same way for the linker to suceed.
-set(BUILD_TYPE "catkin")
-if (BUILD_TYPE STREQUAL "catkin")
-	include(CatkinBuild.cmake)
+set(BUILD_TYPE "ament")
+if (BUILD_TYPE STREQUAL "ament")
+	include(AmentBuild.cmake)
+	# include(CatkinBuild.cmake)
 else()
 	include(PureCMakeBuild.cmake)
 endif()
