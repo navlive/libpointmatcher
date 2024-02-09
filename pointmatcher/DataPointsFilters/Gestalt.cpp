@@ -485,6 +485,7 @@ void GestaltDataPointsFilter<T>::fuseRange(
       gestaltVariances = Matrix::Zero(4, 8);
       numOfValues = Matrix::Zero(4, 8);
 
+      /*
       for (int it=0; it < colCount; ++it) 
       {
         indices(0,it) = floor(radii(it)/radialBinWidth);
@@ -529,6 +530,7 @@ void GestaltDataPointsFilter<T>::fuseRange(
           }
         }
       }
+    */ // ROS2HACK - This no longer compiles with ROS2. Most likely due to changing from Eigen 3.3.7 to Eigen 3.4
     }
     
     Vector serialEigVector;
