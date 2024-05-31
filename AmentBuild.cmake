@@ -2,6 +2,8 @@
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror=return-type)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-O3)
@@ -29,7 +31,7 @@ include_directories(
 )
 
 # Libpointmatcher
-add_library(pointmatcher
+add_library(pointmatcher STATIC
   ${POINTMATCHER_SRC}
   ${POINTMATCHER_HEADERS}
 )
@@ -47,7 +49,7 @@ target_link_libraries(pointmatcher
 )
 
 # Testing utils
-add_library(pointmatcher_testing
+add_library(pointmatcher_testing STATIC
   pointmatcher/testing/utils_filesystem.cpp
   pointmatcher/testing/utils_filesystem.h
   pointmatcher/testing/utils_geometry.cpp
